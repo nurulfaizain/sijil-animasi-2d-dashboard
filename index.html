@@ -412,6 +412,10 @@ h2.mod-title{font-size:20px;font-weight:800;color:var(--navy);margin-bottom:20px
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       Bilangan Pelajar
     </div>
+    <div class="sb-item" data-target="sec-infografik" style="color:var(--purple);font-weight:700">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="9" width="3" height="6" rx="1" fill="currentColor" opacity=".7"/><rect x="6" y="5" width="3" height="10" rx="1" fill="currentColor" opacity=".85"/><rect x="11" y="1" width="3" height="14" rx="1" fill="currentColor"/></svg>
+      Infografik SDD
+    </div>
   </div>
   <!-- Mascot at sidebar bottom -->
   <div class="sb-mascot">
@@ -847,6 +851,27 @@ h2.mod-title{font-size:20px;font-weight:800;color:var(--navy);margin-bottom:20px
       </div>
     </div>
   </div><!-- /sec-pelajar -->
+
+  <!-- ═══ INFOGRAFIK ═══ -->
+  <div class="module-section" id="sec-infografik">
+    <div class="section-label">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="7" width="2.5" height="6" rx="1" fill="currentColor" opacity=".7"/><rect x="5" y="4" width="2.5" height="9" rx="1" fill="currentColor" opacity=".85"/><rect x="9" y="1" width="2.5" height="12" rx="1" fill="currentColor"/></svg>
+      Modul 4
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="9" width="3" height="6" rx="1" fill="currentColor" opacity=".7"/><rect x="6" y="5" width="3" height="10" rx="1" fill="currentColor" opacity=".85"/><rect x="11" y="1" width="3" height="14" rx="1" fill="currentColor"/></svg>
+          Infografik Program SDD 2024/2025
+        </span>
+        <button class="btn btn-primary" id="btnCetakInfografik" onclick="window.print()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="2" y="4.5" width="9" height="6" rx="1.5" stroke="white" stroke-width="1.3"/><path d="M4 4.5V2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v2M4 8.5h5M4 10.5h3" stroke="white" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Cetak / Simpan PDF
+        </button>
+      </div>
+      <div class="panel-body" id="infografikBody" style="padding:0"></div>
+    </div>
+  </div><!-- /sec-infografik -->
 
 </main>
 </div><!-- /content -->
@@ -1710,6 +1735,193 @@ function renderHomeUpcoming(){
 }
 
 // ══════════════════════════════════════════════════
+// INFOGRAFIK — render live from existing data
+// ══════════════════════════════════════════════════
+function renderInfografik(){
+  var el = document.getElementById('infografikBody');
+  if(!el) return;
+
+  // ── compute totals from live data ──
+  var totA=0, totS=0;
+  bajetData.forEach(function(r){ totA+=r.peruntukan; totS+=r.belanja; });
+  var totBaki = totA - totS;
+  var spentPct = totA>0 ? Math.min(Math.round((totS/totA)*100),100) : 0;
+  var donutOffset = Math.round(326.7*(1-(spentPct/100)));
+
+  var sessions = getSesiList();
+  var latestSesi = sessions.length ? sessions[sessions.length-1] : '—';
+  var latestTotal = pelajarData.filter(function(r){return r.sesi===latestSesi;}).reduce(function(a,r){return a+r.bil;},0);
+  var prevSesi = sessions.length>1 ? sessions[sessions.length-2] : null;
+  var prevTotal = prevSesi ? pelajarData.filter(function(r){return r.sesi===prevSesi;}).reduce(function(a,r){return a+r.bil;},0) : 0;
+  var studDiff = latestTotal - prevTotal;
+  var maxSesiTotal = Math.max.apply(null, sessions.map(function(s){
+    return pelajarData.filter(function(r){return r.sesi===s;}).reduce(function(a,r){return a+r.bil;},0);
+  }));
+
+  var now = new Date(); now.setHours(0,0,0,0);
+  var upcomingCount = takwimData.filter(function(e){return new Date(e.year,e.month,e.day)>=now&&e.status!=='selesai';}).length;
+  var selesaiCount  = takwimData.filter(function(e){return e.status==='selesai';}).length;
+
+  var clTotal = clData.length;
+  var clDone  = clData.filter(function(i){return i.done;}).length;
+  var clPct   = clTotal>0 ? Math.round((clDone/clTotal)*100) : 0;
+
+  // ── activity status counts ──
+  var rancangCount = takwimData.filter(function(e){return e.status==='rancang';}).length;
+  var belumCount   = takwimData.filter(function(e){return e.status==='belum';}).length;
+
+  // colour map for bajet legend rows
+  var katColors = ['#7c3aed','#0369a1','#ec4899','#d97706','#16a34a','#94a3b8'];
+
+  // ── build HTML ──
+  var html = '<div style="background:#f5f3ff;padding:28px 24px;font-family:-apple-system,Segoe UI,sans-serif">';
+  html += '<div style="max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:18px">';
+
+  // HERO
+  html += '<div style="background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 55%,#3b0764 100%);border-radius:16px;padding:0;overflow:hidden;position:relative;box-shadow:0 8px 32px rgba(15,23,42,.4)">';
+  html += '<div style="position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,#f9a8d4,#a78bfa,#6d28d9)"></div>';
+  html += '<div style="padding:26px 32px 40px;display:flex;align-items:center;justify-content:space-between;gap:20px">';
+  html += '<div style="flex:1;padding-left:8px">';
+  html += '<div style="display:inline-flex;align-items:center;gap:6px;background:rgba(167,139,250,.18);border:1px solid rgba(167,139,250,.35);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700;color:#c4b5fd;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Infografik Program</div>';
+  html += '<div style="font-size:11px;font-weight:700;letter-spacing:2px;color:rgba(249,168,212,.65);text-transform:uppercase;margin-bottom:6px">Create &nbsp;•&nbsp; Animate &nbsp;•&nbsp; Innovate</div>';
+  html += '<div style="font-size:24px;font-weight:900;color:#fff;margin-bottom:5px;line-height:1.2">Sijil <span style="color:#a78bfa">Animasi 2D</span> (SDD)</div>';
+  html += '<div style="font-size:13px;color:rgba(255,255,255,.6)"><strong style="color:rgba(255,255,255,.9)">Kolej Komuniti Kuala Langat</strong> &nbsp;·&nbsp; Sesi '+latestSesi+'</div>';
+  html += '<div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">';
+  html += '<div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.07);border:1px solid rgba(167,139,250,.25);border-radius:20px;padding:4px 10px;font-size:10px;font-weight:700;color:rgba(196,181,253,.8)">✏️ Lukisan</div>';
+  html += '<div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.07);border:1px solid rgba(167,139,250,.25);border-radius:20px;padding:4px 10px;font-size:10px;font-weight:700;color:rgba(196,181,253,.8)">🎬 Animasi</div>';
+  html += '<div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.07);border:1px solid rgba(167,139,250,.25);border-radius:20px;padding:4px 10px;font-size:10px;font-weight:700;color:rgba(196,181,253,.8)">🎞️ Produksi</div>';
+  html += '</div></div>';
+  // mascot inline SVG in hero
+  html += '<div style="width:95px;flex-shrink:0">';
+  html += '<svg viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;filter:drop-shadow(0 4px 16px rgba(167,139,250,.5))">';
+  html += '<rect x="30" y="72" width="60" height="58" rx="10" fill="#2d4cc8" stroke="#1a2e8a" stroke-width="1.5"/><rect x="25" y="105" width="70" height="28" rx="6" fill="#4338ca" stroke="#1a2e8a" stroke-width="1.2"/><rect x="30" y="108" width="8" height="8" rx="1.5" fill="#d97706" opacity=".7"/><rect x="42" y="108" width="8" height="8" rx="1.5" fill="#d97706" opacity=".6"/><rect x="54" y="108" width="8" height="8" rx="1.5" fill="#d97706" opacity=".7"/><rect x="66" y="108" width="8" height="8" rx="1.5" fill="#d97706" opacity=".6"/><rect x="78" y="108" width="8" height="8" rx="1.5" fill="#d97706" opacity=".7"/><rect x="25" y="130" width="70" height="4" rx="2" fill="#d97706" opacity=".8"/><circle cx="60" cy="83" r="2.5" fill="white" opacity=".8"/><circle cx="60" cy="91" r="2.5" fill="white" opacity=".8"/><rect x="72" y="79" width="16" height="11" rx="2" fill="#1d4ed8"/><rect x="72" y="79" width="16" height="4" rx="1" fill="#ea580c"/><rect x="72" y="83" width="16" height="4" fill="#d97706"/><rect x="72" y="87" width="16" height="3" rx="1" fill="#2563eb"/><text x="74" y="85.5" font-size="3" fill="white" font-family="sans-serif" font-weight="700">KKKL</text><text x="72.5" y="90" font-size="2.5" fill="white" font-family="sans-serif" font-weight="600">ANIMASI</text><rect x="10" y="74" width="22" height="14" rx="7" fill="#2d4cc8" stroke="#1a2e8a" stroke-width="1.2" transform="rotate(15,21,81)"/><ellipse cx="12" cy="93" rx="8" ry="9" fill="#f5c887" stroke="#d4a055" stroke-width="1.2"/><rect x="88" y="74" width="22" height="14" rx="7" fill="#2d4cc8" stroke="#1a2e8a" stroke-width="1.2" transform="rotate(-15,99,81)"/><ellipse cx="109" cy="93" rx="8" ry="9" fill="#f5c887" stroke="#d4a055" stroke-width="1.2"/><rect x="35" y="128" width="20" height="26" rx="8" fill="#2d4cc8" stroke="#1a2e8a" stroke-width="1.2"/><rect x="65" y="128" width="20" height="26" rx="8" fill="#2d4cc8" stroke="#1a2e8a" stroke-width="1.2"/><ellipse cx="45" cy="154" rx="12" ry="6" fill="#1a2e8a"/><ellipse cx="75" cy="154" rx="12" ry="6" fill="#1a2e8a"/><rect x="28" y="30" width="64" height="52" rx="12" fill="#f5c887" stroke="#d4a055" stroke-width="1.5"/><ellipse cx="40" cy="62" rx="7" ry="5" fill="#f9a8d4" opacity=".5"/><ellipse cx="80" cy="62" rx="7" ry="5" fill="#f9a8d4" opacity=".5"/><ellipse cx="47" cy="52" rx="8" ry="9" fill="#111"/><ellipse cx="73" cy="52" rx="8" ry="9" fill="#111"/><ellipse cx="50" cy="49" rx="2.5" ry="3" fill="white"/><ellipse cx="76" cy="49" rx="2.5" ry="3" fill="white"/><path d="M50 68 Q60 74 70 68" stroke="#c2754d" stroke-width="1.8" stroke-linecap="round" fill="none"/><path d="M28 36 Q30 16 60 14 Q90 16 92 36 Z" fill="#7f8c8d" stroke="#555" stroke-width="1.2"/><path d="M28 36 Q30 16 45 14 Q35 22 32 36 Z" fill="#606c6d" opacity=".5"/><rect x="82" y="8" width="9" height="34" rx="3" fill="#ea580c" transform="rotate(25,86,25)"/><rect x="84" y="6" width="9" height="34" rx="3" fill="#2563eb" transform="rotate(28,88,23)"/><polygon points="96,38 100,32 104,42" fill="#f5c887"/><rect x="28" y="30" width="64" height="52" rx="12" fill="none" stroke="#c2754d" stroke-width="1.5"/>';
+  html += '</svg></div>';
+  // filmstrip
+  html += '</div>';
+  html += '<div style="height:22px;background:rgba(0,0,0,.35);display:flex;align-items:center;overflow:hidden;padding:3px 6px;gap:3px">';
+  for(var fi=0;fi<24;fi++) html += '<div style="width:26px;height:16px;border:1.5px solid rgba(255,255,255,.3);border-radius:2px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center"><div style="width:6px;height:6px;border-radius:1px;background:rgba(255,255,255,.35)"></div></div>';
+  html += '</div></div>';
+
+  // STAT STRIP
+  html += '<div style="background:linear-gradient(135deg,#1e1b4b,#2d1b69);border-radius:14px;padding:16px 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:0">';
+  var stats=[
+    [latestTotal,'Pelajar Terkini'],
+    ['RM '+Math.round(totA/1000)+'K','Jumlah Peruntukan'],
+    [takwimData.length,'Aktiviti 2025'],
+    [clPct+'%','Tugasan Selesai']
+  ];
+  stats.forEach(function(s,i){
+    html += '<div style="text-align:center;padding:0 10px;'+(i<3?'border-right:1px solid rgba(167,139,250,.2)':'')+'">';
+    html += '<div style="font-size:22px;font-weight:900;color:#a78bfa;line-height:1;margin-bottom:4px">'+s[0]+'</div>';
+    html += '<div style="font-size:10px;font-weight:600;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.6px">'+s[1]+'</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  // KPI CARDS
+  var kpiCards=[
+    {lbl:'Pelajar Berdaftar',val:latestTotal,sub:'Sesi '+latestSesi+'<br>'+studDiff>=0?'↑ +'+studDiff+' dari sesi lepas':'↓ '+studDiff+' dari sesi lepas',bar:maxSesiTotal>0?Math.round((latestTotal/maxSesiTotal)*100):0,barColor:'linear-gradient(90deg,#7c3aed,#a78bfa)',valColor:'#6d28d9',icon:'bg:#1e1b4b'},
+    {lbl:'Baki Bajet',val:fmt(totBaki),sub:'Peruntukan: '+fmt(totA)+'<br>Dibelanjakan: '+fmt(totS),bar:spentPct,barColor:'linear-gradient(90deg,#0284c7,#38bdf8)',valColor:'#0369a1',icon:'bg:#0c4a6e'},
+    {lbl:'Aktiviti Akan Datang',val:upcomingCount,sub:selesaiCount+' Selesai · '+rancangCount+' Dirancang<br>'+belumCount+' Belum Mula',bar:takwimData.length>0?Math.round((selesaiCount/takwimData.length)*100):0,barColor:'linear-gradient(90deg,#16a34a,#4ade80)',valColor:'#16a34a',icon:'bg:#14532d'}
+  ];
+  html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">';
+  kpiCards.forEach(function(k){
+    html += '<div style="background:#fff;border-radius:14px;padding:20px;border:1.5px solid #e9d5ff;overflow:hidden;position:relative">';
+    html += '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#64748b;margin-bottom:4px">'+k.lbl+'</div>';
+    html += '<div style="font-size:28px;font-weight:900;letter-spacing:-1px;color:'+k.valColor+';line-height:1;margin-bottom:5px">'+k.val+'</div>';
+    html += '<div style="font-size:11px;color:#64748b;line-height:1.5">'+k.sub+'</div>';
+    html += '<div style="height:4px;border-radius:4px;background:#e9d5ff;margin-top:12px;overflow:hidden"><div style="height:100%;border-radius:4px;width:'+k.bar+'%;background:'+k.barColor+'"></div></div>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  // BAJET BREAKDOWN
+  html += '<div style="background:#fff;border-radius:14px;padding:20px 24px;border:1.5px solid #e9d5ff">';
+  html += '<div style="font-size:13px;font-weight:800;color:#1e1b4b;margin-bottom:4px">💰 Pecahan Bajet Program SDD</div>';
+  html += '<div style="font-size:11px;color:#64748b;margin-bottom:16px">Peruntukan vs Perbelanjaan mengikut kategori</div>';
+  html += '<div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">';
+  // donut
+  html += '<div style="position:relative;width:120px;height:120px;flex-shrink:0">';
+  html += '<svg viewBox="0 0 130 130" fill="none" style="width:120px;height:120px"><circle cx="65" cy="65" r="52" stroke="#e9d5ff" stroke-width="14"/>';
+  html += '<circle cx="65" cy="65" r="52" stroke="url(#ig_dg)" stroke-width="14" stroke-dasharray="326.7" stroke-dashoffset="'+donutOffset+'" stroke-linecap="round" transform="rotate(-90 65 65)"/>';
+  html += '<defs><linearGradient id="ig_dg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient></defs></svg>';
+  html += '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center"><div style="font-size:20px;font-weight:900;color:#6d28d9;line-height:1">'+spentPct+'%</div><div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Dibelanjakan</div></div>';
+  html += '</div>';
+  // legend
+  html += '<div style="flex:1;display:flex;flex-direction:column;gap:9px">';
+  bajetData.forEach(function(r,i){
+    var rPct = r.peruntukan>0?Math.min(Math.round((r.belanja/r.peruntukan)*100),100):0;
+    var col = katColors[i] || '#94a3b8';
+    var shortName = r.kategori.length>28 ? r.kategori.substring(0,27)+'…' : r.kategori;
+    html += '<div style="display:flex;align-items:center;gap:10px">';
+    html += '<div style="width:10px;height:10px;border-radius:3px;flex-shrink:0;background:'+col+'"></div>';
+    html += '<div style="flex:1;font-size:11.5px;font-weight:600;color:#1e1b4b;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+shortName+'</div>';
+    html += '<div style="width:90px;height:6px;border-radius:6px;background:#f1f5f9;overflow:hidden;flex-shrink:0"><div style="height:100%;border-radius:6px;width:'+rPct+'%;background:'+col+'"></div></div>';
+    html += '<div style="font-size:11px;font-weight:700;width:32px;text-align:right;color:'+col+'">'+rPct+'%</div>';
+    html += '</div>';
+  });
+  html += '</div></div></div>';
+
+  // PELAJAR TREND
+  html += '<div style="background:#fff;border-radius:14px;padding:20px 24px;border:1.5px solid #e9d5ff">';
+  html += '<div style="font-size:13px;font-weight:800;color:#1e1b4b;margin-bottom:4px">👥 Trend Enrolmen Pelajar SDD</div>';
+  html += '<div style="font-size:11px;color:#64748b;margin-bottom:14px">Bilangan pelajar berdaftar mengikut sesi akademik</div>';
+  html += '<div style="display:flex;flex-direction:column;gap:8px">';
+  sessions.forEach(function(s){
+    var sTotal = pelajarData.filter(function(r){return r.sesi===s;}).reduce(function(a,r){return a+r.bil;},0);
+    var pct    = maxSesiTotal>0?Math.round((sTotal/maxSesiTotal)*100):0;
+    var isLatest = s===latestSesi;
+    html += '<div style="display:grid;grid-template-columns:70px 1fr 36px;align-items:center;gap:10px">';
+    html += '<div style="font-size:11px;font-weight:'+(isLatest?'800':'600')+';color:'+(isLatest?'#7c3aed':'#64748b')+'">'+s+'</div>';
+    html += '<div style="height:24px;border-radius:6px;background:#f5f3ff;overflow:hidden;border:1px solid #e9d5ff"><div style="height:100%;border-radius:6px;width:'+pct+'%;background:'+(isLatest?'linear-gradient(90deg,#6d28d9,#c084fc)':'linear-gradient(90deg,#7c3aed,#a78bfa)')+';display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">'+sTotal+'</div></div>';
+    html += '<div style="font-size:14px;font-weight:800;color:'+(isLatest?'#6d28d9':'#a78bfa')+';text-align:right">'+sTotal+(isLatest?' ↑':'')+'</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  html += '<div style="margin-top:10px;font-size:11px;color:'+(studDiff>=0?'#16a34a':'#dc2626')+';font-weight:700">'+(studDiff>=0?'↑ +':'↓ ')+studDiff+' pelajar dari sesi lepas ('+(Math.abs(prevTotal)>0?Math.round(Math.abs(studDiff/prevTotal)*100):0)+'%)</div>';
+  html += '</div>';
+
+  // AKTIVITI
+  html += '<div>';
+  html += '<div style="font-size:13px;font-weight:800;color:#1e1b4b;margin-bottom:12px">📅 Aktiviti Program SDD '+(new Date().getFullYear())+'</div>';
+  html += '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">';
+  var sortedAkt = takwimData.slice().sort(function(a,b){return new Date(a.year,a.month,a.day)-new Date(b.year,b.month,b.day);});
+  var statusBadge = {selesai:'background:#dcfce7;color:#166534',rancang:'background:#fef9c3;color:#854d0e',belum:'background:#ede9fe;color:#5b21b6'};
+  var dotCol = {selesai:'#16a34a',rancang:'#d97706',belum:'#7c3aed'};
+  sortedAkt.forEach(function(ev){
+    html += '<div style="background:#fff;border-radius:12px;padding:12px 14px;border:1.5px solid #e9d5ff;display:flex;gap:10px;align-items:flex-start">';
+    html += '<div style="width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:3px;background:'+(dotCol[ev.status]||'#7c3aed')+'"></div>';
+    html += '<div style="flex:1;min-width:0">';
+    html += '<div style="font-size:12px;font-weight:700;color:#1e1b4b;line-height:1.3;margin-bottom:3px">'+ev.nama+'</div>';
+    html += '<div style="font-size:10.5px;color:#64748b;margin-bottom:4px">'+pad2(ev.day)+' '+namaBulan[ev.month]+' '+ev.year+'&nbsp;·&nbsp;'+ev.lokasi+'</div>';
+    html += '<span style="display:inline-flex;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700;'+statusBadge[ev.status]+'">'+statusLabel[ev.status]+'</span>';
+    html += '</div></div>';
+  });
+  html += '</div></div>';
+
+  // CHECKLIST
+  html += '<div style="background:#fff;border-radius:14px;border:1.5px solid #e9d5ff;overflow:hidden">';
+  html += '<div style="background:linear-gradient(135deg,#0f172a,#1e1b4b);padding:14px 20px;display:flex;align-items:center;justify-content:space-between">';
+  html += '<div style="font-size:13px;font-weight:800;color:#fff">✅ Senarai Semak Program SDD</div>';
+  html += '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:800;color:#a78bfa">'+clPct+'%</span>';
+  html += '<div style="width:70px;height:5px;border-radius:5px;background:rgba(255,255,255,.15);overflow:hidden"><div style="height:100%;border-radius:5px;width:'+clPct+'%;background:linear-gradient(90deg,#f9a8d4,#a78bfa)"></div></div></div>';
+  html += '</div>';
+  html += '<div style="padding:14px 20px;display:flex;flex-direction:column;gap:7px">';
+  clData.forEach(function(item){
+    html += '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:9px;border:1.5px solid '+(item.done?'#86efac':'#e9d5ff')+';background:'+(item.done?'#f0fdf4':'#f9f8ff')+'">';
+    html += '<div style="width:18px;height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;'+(item.done?'background:linear-gradient(135deg,#16a34a,#22c55e);border:none':'border:2px solid #d4b8f8')+'">';
+    if(item.done) html += '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    html += '</div>';
+    html += '<div style="font-size:12.5px;font-weight:600;color:'+(item.done?'#64748b':'#1e1b4b')+';'+(item.done?'text-decoration:line-through':'')+'">';
+    html += item.text+'</div></div>';
+  });
+  html += '</div></div>';
+
+  html += '</div></div>';
+  el.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════
 renderBajet();
@@ -1717,6 +1929,7 @@ renderCalendar();
 renderPelajar();
 renderCL();
 renderHomeUpcoming();
+renderInfografik();
 </script>
 </body>
 </html>
