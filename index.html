@@ -208,32 +208,77 @@ h2.mod-title{font-size:20px;font-weight:800;color:var(--navy);margin-bottom:20px
 .row-bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--purple),var(--purp2));transition:width .4s}
 .pct-cell{display:flex;align-items:center;gap:6px;white-space:nowrap;font-weight:700;font-size:13px}
 
-/* ─────────────── CALENDAR ─────────────── */
-.cal-add-form{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:20px}
-.cal-add-form .form-group{margin-bottom:0;flex:1;min-width:140px}
-.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+/* ─────────────── CALENDAR (enhanced) ─────────────── */
+.cal-layout{display:grid;grid-template-columns:1fr 280px;gap:22px;align-items:start}
+@media(max-width:900px){.cal-layout{grid-template-columns:1fr}}
+
+/* Add form */
+.cal-add-form{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:linear-gradient(135deg,#f5f3ff,#fdf2f8);border:1.5px solid #e9d5ff;border-radius:14px;padding:16px 18px;margin-bottom:22px}
+.cal-add-form .form-group{margin-bottom:0;flex:1;min-width:130px}
+
+/* Nav bar */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:8px}
+.cal-nav-center{display:flex;align-items:center;gap:10px}
 .cal-month-label{font-size:18px;font-weight:800;color:var(--navy)}
-.cal-btn{background:var(--bg);border:1.5px solid var(--border);color:var(--navy);border-radius:9px;width:34px;height:34px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
-.cal-btn:hover{background:var(--purp-bg);color:var(--purple)}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.cal-day-hdr{text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:7px 0}
-.cal-cell{aspect-ratio:1;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;font-weight:600;cursor:default;position:relative;transition:transform .15s,background .15s;color:var(--muted)}
-.cal-cell:not(.empty):not(.has-event):hover{background:var(--bg)}
-.cal-cell.today{outline:2px solid var(--purple);outline-offset:1px;color:var(--purple);font-weight:800}
-.cal-cell.has-event.ev-selesai{background:#dcfce7;border:1.5px solid #86efac;color:#166534;cursor:pointer}
-.cal-cell.has-event.ev-rancang{background:#fef9c3;border:1.5px solid #fde047;color:#854d0e;cursor:pointer}
-.cal-cell.has-event.ev-belum{background:#e0e7ff;border:1.5px solid #a5b4fc;color:#3730a3;cursor:pointer}
-.cal-cell.has-event:hover{transform:scale(1.08)}
-.cal-dot{width:5px;height:5px;border-radius:50%;margin-top:2px}
-.cal-detail{margin-top:18px;border-radius:12px;padding:16px 18px;display:none}
+.cal-btn{background:var(--white);border:1.5px solid #e9d5ff;color:var(--purple);border-radius:9px;width:34px;height:34px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.cal-btn:hover{background:var(--purp-bg);border-color:var(--purple)}
+.cal-today-btn{background:linear-gradient(135deg,var(--purple),var(--purp2));color:#fff;border:none;border-radius:9px;padding:0 14px;height:34px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);transition:opacity .15s}
+.cal-today-btn:hover{opacity:.85}
+
+/* Calendar grid */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-day-hdr{text-align:center;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--purple);padding:8px 0;opacity:.7}
+.cal-cell{min-height:72px;border-radius:10px;display:flex;flex-direction:column;padding:6px 5px 4px;font-size:13px;font-weight:700;cursor:pointer;position:relative;transition:box-shadow .15s,transform .15s;color:var(--navy);background:var(--white);border:1.5px solid transparent}
+.cal-cell.empty{background:transparent;border-color:transparent;cursor:default;pointer-events:none}
+.cal-cell:not(.empty):hover{background:#f5f3ff;border-color:#e9d5ff;transform:translateY(-1px);box-shadow:0 2px 8px rgba(121,75,235,.1)}
+.cal-cell.today{background:linear-gradient(135deg,var(--purple),#6d28d9);color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(121,75,235,.35)}
+.cal-cell.today .cal-day-num{color:#fff}
+.cal-cell.weekend .cal-day-num{color:#c084fc}
+.cal-cell.other-month{opacity:.35}
+.cal-day-num{font-size:13px;font-weight:800;line-height:1;margin-bottom:3px;display:block}
+.cal-cell.today .cal-day-num{color:#fff}
+.cal-events-wrap{display:flex;flex-direction:column;gap:2px;overflow:hidden}
+.cal-ev-chip{font-size:9.5px;font-weight:700;border-radius:4px;padding:2px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;cursor:pointer}
+/* Category colours */
+.ev-chip-selesai{background:#dcfce7;color:#166534}
+.ev-chip-rancang{background:#fef9c3;color:#854d0e}
+.ev-chip-belum{background:#ede9fe;color:#5b21b6}
+/* category colours (cat field) */
+.ev-chip-bengkel{background:#fce7f3;color:#9d174d}
+.ev-chip-lawatan{background:#e0f2fe;color:#075985}
+.ev-chip-pameran{background:#fef3c7;color:#92400e}
+.ev-chip-seminar{background:#f0fdf4;color:#166534}
+.ev-chip-lain{background:#f5f3ff;color:#5b21b6}
+.cal-more{font-size:9px;color:var(--purple);font-weight:700;padding:1px 4px}
+
+/* Detail panel */
+.cal-detail{margin-top:18px;border-radius:12px;padding:16px 18px;display:none;border:1.5px solid transparent}
 .cal-detail.visible{display:block}
-.cal-detail.ev-selesai{background:#dcfce7;border:1.5px solid #86efac}
-.cal-detail.ev-rancang{background:#fef9c3;border:1.5px solid #fde047}
-.cal-detail.ev-belum{background:#e0e7ff;border:1.5px solid #a5b4fc}
+.cal-detail.ev-selesai{background:#f0fdf4;border-color:#86efac}
+.cal-detail.ev-rancang{background:#fefce8;border-color:#fde047}
+.cal-detail.ev-belum{background:#f5f3ff;border-color:#c4b5fd}
 .cal-detail-title{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:3px}
-.cal-detail-loc{font-size:12px;color:var(--muted);margin-bottom:10px}
+.cal-detail-loc{font-size:12px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.cal-detail-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
 .cal-detail-actions{display:flex;gap:8px;margin-top:10px}
-.legend-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;align-items:center}
+.legend-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:center}
+
+/* Upcoming panel */
+.cal-upcoming{background:var(--white);border:1.5px solid #e9d5ff;border-radius:14px;overflow:hidden}
+.cal-upcoming-hdr{background:linear-gradient(135deg,#7c3aed,#a855f7);padding:14px 16px;display:flex;align-items:center;gap:8px}
+.cal-upcoming-hdr-title{font-size:13px;font-weight:800;color:#fff}
+.cal-upcoming-hdr-sub{font-size:10px;color:rgba(255,255,255,.65);font-weight:500}
+.cal-upcoming-list{padding:10px 12px;display:flex;flex-direction:column;gap:6px;max-height:460px;overflow-y:auto}
+.cal-upcoming-list::-webkit-scrollbar{width:3px}
+.cal-upcoming-list::-webkit-scrollbar-thumb{background:#e9d5ff;border-radius:3px}
+.cal-up-item{display:flex;gap:10px;align-items:flex-start;padding:10px 10px;border-radius:10px;background:var(--bg);border:1.5px solid var(--border);cursor:pointer;transition:background .14s,border-color .14s}
+.cal-up-item:hover{background:#f5f3ff;border-color:#c4b5fd}
+.cal-up-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.cal-up-info{flex:1;min-width:0}
+.cal-up-name{font-size:12px;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.cal-up-date{font-size:10.5px;color:var(--muted);font-weight:500}
+.cal-up-badge{font-size:10px;font-weight:700;border-radius:6px;padding:2px 7px;white-space:nowrap;flex-shrink:0}
+.cal-up-empty{text-align:center;padding:24px 12px;color:var(--muted);font-size:12px}
 
 /* ─────────────── PELAJAR ─────────────── */
 .pelajar-toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
@@ -589,15 +634,28 @@ h2.mod-title{font-size:20px;font-weight:800;color:var(--navy);margin-bottom:20px
     <div class="section-label"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="11" rx="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 1v2M9.5 1v2M1 6h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Modul 2</div>
     <div class="panel">
       <div class="panel-header">
-        <span class="panel-title">Takwim Aktiviti SDD 2024/2025</span>
+        <span class="panel-title">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="2.5" width="13" height="12" rx="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 1.5v2M11 1.5v2M1.5 6.5h13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Takwim Aktiviti SDD 2024/2025
+        </span>
       </div>
       <div class="panel-body">
+
         <!-- Add form -->
         <div class="cal-add-form">
           <div class="form-group"><label class="form-label">Tarikh</label><input class="form-input" type="date" id="calInDate"/></div>
-          <div class="form-group" style="flex:2;min-width:180px"><label class="form-label">Nama Aktiviti</label><input class="form-input" type="text" id="calInNama" placeholder="cth. Bengkel Storyboard"/></div>
-          <div class="form-group" style="flex:2;min-width:180px"><label class="form-label">Lokasi</label><input class="form-input" type="text" id="calInLokasi" placeholder="cth. Makmal A"/></div>
-          <div class="form-group" style="min-width:160px"><label class="form-label">Status</label>
+          <div class="form-group" style="flex:2;min-width:160px"><label class="form-label">Nama Aktiviti</label><input class="form-input" type="text" id="calInNama" placeholder="cth. Bengkel Storyboard"/></div>
+          <div class="form-group" style="flex:2;min-width:150px"><label class="form-label">Lokasi</label><input class="form-input" type="text" id="calInLokasi" placeholder="cth. Makmal A"/></div>
+          <div class="form-group" style="min-width:140px"><label class="form-label">Kategori</label>
+            <select class="form-input" id="calInKat">
+              <option value="lain">Lain-lain</option>
+              <option value="bengkel">Bengkel</option>
+              <option value="lawatan">Lawatan Industri</option>
+              <option value="pameran">Pameran</option>
+              <option value="seminar">Seminar</option>
+            </select>
+          </div>
+          <div class="form-group" style="min-width:150px"><label class="form-label">Status</label>
             <select class="form-input" id="calInStatus">
               <option value="belum">Belum Mula</option>
               <option value="rancang">Dalam Perancangan</option>
@@ -606,30 +664,59 @@ h2.mod-title{font-size:20px;font-weight:800;color:var(--navy);margin-bottom:20px
           </div>
           <button class="btn btn-primary" id="btnTambahAktiviti" style="align-self:flex-end">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
-            Tambah Aktiviti
+            Tambah
           </button>
         </div>
-        <!-- Cal nav -->
-        <div class="cal-nav">
-          <button class="cal-btn" id="calPrev">&#8249;</button>
-          <span class="cal-month-label" id="calMonthLabel"></span>
-          <button class="cal-btn" id="calNext">&#8250;</button>
-        </div>
-        <div class="cal-grid" id="calGrid"></div>
-        <div class="cal-detail" id="calDetail">
-          <div class="cal-detail-title" id="calDetailTitle"></div>
-          <div class="cal-detail-loc" id="calDetailLoc"></div>
-          <span class="pill" id="calDetailStatus"></span>
-          <div class="cal-detail-actions">
-            <button class="btn btn-sm btn-edit-rec" id="calDetailEdit">Edit</button>
-            <button class="btn btn-sm btn-del-rec" id="calDetailDel">Padam</button>
+
+        <!-- Two-column layout: Calendar + Upcoming -->
+        <div class="cal-layout">
+          <div>
+            <!-- Nav -->
+            <div class="cal-nav">
+              <button class="cal-btn" id="calPrev">&#8249;</button>
+              <div class="cal-nav-center">
+                <span class="cal-month-label" id="calMonthLabel"></span>
+                <button class="cal-today-btn" id="calTodayBtn">Hari Ini</button>
+              </div>
+              <button class="cal-btn" id="calNext">&#8250;</button>
+            </div>
+            <!-- Grid -->
+            <div class="cal-grid" id="calGrid"></div>
+            <!-- Detail panel -->
+            <div class="cal-detail" id="calDetail">
+              <div class="cal-detail-title" id="calDetailTitle"></div>
+              <div class="cal-detail-loc"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1a3.5 3.5 0 0 1 3.5 3.5C9.5 7.5 6 11 6 11S2.5 7.5 2.5 4.5A3.5 3.5 0 0 1 6 1Z" stroke="currentColor" stroke-width="1.3"/><circle cx="6" cy="4.5" r="1" fill="currentColor"/></svg><span id="calDetailLoc"></span></div>
+              <div class="cal-detail-meta">
+                <span class="pill" id="calDetailStatus"></span>
+                <span class="pill" id="calDetailKat" style="background:#f5f3ff;color:#5b21b6"></span>
+              </div>
+              <div class="cal-detail-actions">
+                <button class="btn btn-sm btn-edit-rec" id="calDetailEdit">Edit</button>
+                <button class="btn btn-sm btn-del-rec" id="calDetailDel">Padam</button>
+              </div>
+            </div>
+            <!-- Legend -->
+            <div class="legend-row">
+              <span style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px">Status:</span>
+              <span class="pill pill-selesai">Selesai</span>
+              <span class="pill pill-rancang">Dalam Perancangan</span>
+              <span class="pill pill-belum">Belum Mula</span>
+            </div>
           </div>
-        </div>
-        <div class="legend-row">
-          <span class="pill pill-selesai">Selesai Dilaksanakan</span>
-          <span class="pill pill-rancang">Dalam Perancangan</span>
-          <span class="pill pill-belum">Belum Mula</span>
-        </div>
+
+          <!-- Upcoming panel -->
+          <div class="cal-upcoming">
+            <div class="cal-upcoming-hdr">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v5l3 2" stroke="white" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="8" r="6.5" stroke="white" stroke-width="1.5"/></svg>
+              <div>
+                <div class="cal-upcoming-hdr-title">Aktiviti Akan Datang</div>
+                <div class="cal-upcoming-hdr-sub">Aktiviti belum selesai</div>
+              </div>
+            </div>
+            <div class="cal-upcoming-list" id="calUpcomingList"></div>
+          </div>
+        </div><!-- /cal-layout -->
+
       </div>
     </div>
   </div><!-- /sec-takwim -->
@@ -700,6 +787,15 @@ h2.mod-title{font-size:20px;font-weight:800;color:var(--navy);margin-bottom:20px
     <div class="form-group"><label class="form-label">Tarikh</label><input class="form-input" type="date" id="tDate"/></div>
     <div class="form-group"><label class="form-label">Nama Aktiviti</label><input class="form-input" type="text" id="tNama"/></div>
     <div class="form-group"><label class="form-label">Lokasi</label><input class="form-input" type="text" id="tLokasi"/></div>
+    <div class="form-group"><label class="form-label">Kategori</label>
+      <select class="form-input" id="tKat">
+        <option value="lain">Lain-lain</option>
+        <option value="bengkel">Bengkel</option>
+        <option value="lawatan">Lawatan Industri</option>
+        <option value="pameran">Pameran</option>
+        <option value="seminar">Seminar</option>
+      </select>
+    </div>
     <div class="form-group"><label class="form-label">Status</label>
       <select class="form-input" id="tStatus">
         <option value="belum">Belum Mula</option>
@@ -937,73 +1033,158 @@ var takwimNextId = lsGet('sdd_takwim_nid', 20);
 var takwimEditId = null;
 var calDetailEventId = null;
 
-var statusLabel = {selesai:'Selesai Dilaksanakan',rancang:'Dalam Perancangan',belum:'Belum Mula'};
+var statusLabel     = {selesai:'Selesai Dilaksanakan',rancang:'Dalam Perancangan',belum:'Belum Mula'};
 var statusPillClass = {selesai:'pill pill-selesai',rancang:'pill pill-rancang',belum:'pill pill-belum'};
-var namaBulan   = ['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'];
+var katLabel        = {bengkel:'Bengkel',lawatan:'Lawatan Industri',pameran:'Pameran',seminar:'Seminar',lain:'Lain-lain'};
+var namaBulan = ['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'];
 var today = new Date();
-var calYear = today.getFullYear();
+var calYear  = today.getFullYear();
 var calMonth = today.getMonth();
 
 function saveTakwim(){ lsSet('sdd_takwim',takwimData); lsSet('sdd_takwim_nid',takwimNextId); }
-
 function getEventsForDay(yr,mo,dy){ return takwimData.filter(function(e){return e.year===yr&&e.month===mo&&e.day===dy;}); }
 
+// Chip class: prefer category colour, fallback to status colour
+function chipClass(ev){
+  var kat = ev.kat||'lain';
+  if(kat && kat!=='lain') return 'cal-ev-chip ev-chip-'+kat;
+  return 'cal-ev-chip ev-chip-'+ev.status;
+}
+function dotColor(ev){
+  var c = {selesai:'#16a34a',rancang:'#d97706',belum:'#7c3aed',bengkel:'#ec4899',lawatan:'#0284c7',pameran:'#d97706',seminar:'#16a34a'};
+  return c[ev.kat]||c[ev.status]||'#7c3aed';
+}
+
 function renderCalendar(){
-  var grid=document.getElementById('calGrid');
-  grid.innerHTML='';
-  document.getElementById('calMonthLabel').textContent=namaBulan[calMonth]+' '+calYear;
-  var days=['Ahd','Isn','Sel','Rab','Kha','Jum','Sab'];
+  var grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  document.getElementById('calMonthLabel').textContent = namaBulan[calMonth]+' '+calYear;
+  var days = ['Ahd','Isn','Sel','Rab','Kha','Jum','Sab'];
   days.forEach(function(d){ var h=document.createElement('div');h.className='cal-day-hdr';h.textContent=d;grid.appendChild(h); });
-  var firstDay=new Date(calYear,calMonth,1).getDay();
-  var daysIn=new Date(calYear,calMonth+1,0).getDate();
-  for(var i=0;i<firstDay;i++){ var e=document.createElement('div');e.className='cal-cell empty';grid.appendChild(e); }
+  var firstDay = new Date(calYear,calMonth,1).getDay();
+  var daysIn   = new Date(calYear,calMonth+1,0).getDate();
+
+  for(var i=0;i<firstDay;i++){ var emp=document.createElement('div');emp.className='cal-cell empty';grid.appendChild(emp); }
+
   for(var d=1;d<=daysIn;d++){
-    var cell=document.createElement('div');
-    var evs=getEventsForDay(calYear,calMonth,d);
-    var cls='cal-cell';
-    if(evs.length) cls+=' has-event ev-'+evs[0].status;
-    if(d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear()) cls+=' today';
-    cell.className=cls; cell.textContent=d;
+    var cell = document.createElement('div');
+    var evs  = getEventsForDay(calYear,calMonth,d);
+    var dow  = new Date(calYear,calMonth,d).getDay();
+    var cls  = 'cal-cell';
+    if(dow===0||dow===6) cls+=' weekend';
+    var isToday = (d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear());
+    if(isToday) cls+=' today';
+    cell.className = cls;
+
+    // day number
+    var numEl = document.createElement('span');
+    numEl.className = 'cal-day-num';
+    numEl.textContent = d;
+    cell.appendChild(numEl);
+
+    // event chips
     if(evs.length){
-      var dot=document.createElement('div');dot.className='cal-dot';
-      dot.style.background=evs[0].status==='selesai'?'#16a34a':evs[0].status==='rancang'?'#d97706':'#4338ca';
-      cell.appendChild(dot);
-      (function(ev){ cell.addEventListener('click',function(){showCalDetail(ev[0]);}); })(evs);
+      var wrap = document.createElement('div');
+      wrap.className = 'cal-events-wrap';
+      var show = Math.min(evs.length, 2);
+      for(var ei=0;ei<show;ei++){
+        (function(ev){
+          var chip = document.createElement('div');
+          chip.className = chipClass(ev);
+          chip.textContent = ev.nama;
+          chip.addEventListener('click', function(e){ e.stopPropagation(); showCalDetail(ev); });
+          wrap.appendChild(chip);
+        })(evs[ei]);
+      }
+      if(evs.length>2){
+        var more = document.createElement('div');
+        more.className = 'cal-more';
+        more.textContent = '+'+(evs.length-2)+' lagi';
+        wrap.appendChild(more);
+      }
+      cell.appendChild(wrap);
     }
+
+    // click empty day → pre-fill add form
+    (function(day){
+      cell.addEventListener('click', function(){
+        var dateStr = calYear+'-'+pad2(calMonth+1)+'-'+pad2(day);
+        document.getElementById('calInDate').value = dateStr;
+        document.getElementById('calInNama').focus();
+      });
+    })(d);
+
     grid.appendChild(cell);
   }
+
   document.getElementById('calDetail').classList.remove('visible');
+  renderUpcoming();
   updateHomeAktiviti();
 }
 
-function showCalDetail(ev){
-  calDetailEventId=ev.id;
-  document.getElementById('calDetailTitle').textContent=ev.nama;
-  document.getElementById('calDetailLoc').textContent=ev.lokasi;
-  var sp=document.getElementById('calDetailStatus');
-  sp.textContent=statusLabel[ev.status]; sp.className=statusPillClass[ev.status];
-  var panel=document.getElementById('calDetail');
-  panel.className='cal-detail visible ev-'+ev.status;
+function renderUpcoming(){
+  var list = document.getElementById('calUpcomingList');
+  if(!list) return;
+  var now = new Date(); now.setHours(0,0,0,0);
+  var upcoming = takwimData.filter(function(e){
+    return new Date(e.year,e.month,e.day) >= now;
+  }).sort(function(a,b){ return new Date(a.year,a.month,a.day)-new Date(b.year,b.month,b.day); });
+  list.innerHTML = '';
+  if(!upcoming.length){
+    list.innerHTML = '<div class="cal-up-empty">Tiada aktiviti akan datang.</div>';
+    return;
+  }
+  upcoming.forEach(function(ev){
+    var item = document.createElement('div');
+    item.className = 'cal-up-item';
+    item.innerHTML =
+      '<div class="cal-up-dot" style="background:'+dotColor(ev)+'"></div>'+
+      '<div class="cal-up-info">'+
+        '<div class="cal-up-name">'+ev.nama+'</div>'+
+        '<div class="cal-up-date">'+pad2(ev.day)+' '+namaBulan[ev.month]+' '+ev.year+(ev.lokasi&&ev.lokasi!=='—'?' &middot; '+ev.lokasi:'')+'</div>'+
+      '</div>'+
+      '<span class="cal-up-badge '+statusPillClass[ev.status]+'">'+statusLabel[ev.status]+'</span>';
+    item.addEventListener('click', function(){
+      calYear=ev.year; calMonth=ev.month; renderCalendar(); showCalDetail(ev);
+    });
+    list.appendChild(item);
+  });
 }
 
+function showCalDetail(ev){
+  calDetailEventId = ev.id;
+  document.getElementById('calDetailTitle').textContent = ev.nama;
+  document.getElementById('calDetailLoc').textContent   = ev.lokasi;
+  var sp = document.getElementById('calDetailStatus');
+  sp.textContent = statusLabel[ev.status]; sp.className = statusPillClass[ev.status];
+  var kp = document.getElementById('calDetailKat');
+  kp.textContent = katLabel[ev.kat||'lain'];
+  var panel = document.getElementById('calDetail');
+  panel.className = 'cal-detail visible ev-'+ev.status;
+}
+
+// Nav buttons
 document.getElementById('calPrev').addEventListener('click',function(){ calMonth--;if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); });
 document.getElementById('calNext').addEventListener('click',function(){ calMonth++;if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); });
+document.getElementById('calTodayBtn').addEventListener('click',function(){ calYear=today.getFullYear();calMonth=today.getMonth(); renderCalendar(); });
 
 // Add activity (inline form)
 document.getElementById('btnTambahAktiviti').addEventListener('click',function(){
-  var dateVal=document.getElementById('calInDate').value;
-  var nama=document.getElementById('calInNama').value.trim();
-  var lokasi=document.getElementById('calInLokasi').value.trim();
-  var status=document.getElementById('calInStatus').value;
+  var dateVal = document.getElementById('calInDate').value;
+  var nama    = document.getElementById('calInNama').value.trim();
+  var lokasi  = document.getElementById('calInLokasi').value.trim();
+  var kat     = document.getElementById('calInKat').value;
+  var status  = document.getElementById('calInStatus').value;
   if(!dateVal){document.getElementById('calInDate').focus();return;}
   if(!nama){document.getElementById('calInNama').focus();return;}
-  var parts=dateVal.split('-');
-  takwimData.push({id:takwimNextId++,year:parseInt(parts[0]),month:parseInt(parts[1])-1,day:parseInt(parts[2]),nama:nama,lokasi:lokasi||'—',status:status});
+  var parts = dateVal.split('-');
+  takwimData.push({id:takwimNextId++,year:parseInt(parts[0]),month:parseInt(parts[1])-1,day:parseInt(parts[2]),nama:nama,lokasi:lokasi||'—',kat:kat,status:status});
   saveTakwim();
   calYear=parseInt(parts[0]); calMonth=parseInt(parts[1])-1;
   document.getElementById('calInDate').value='';
   document.getElementById('calInNama').value='';
   document.getElementById('calInLokasi').value='';
+  document.getElementById('calInKat').value='lain';
   document.getElementById('calInStatus').value='belum';
   renderCalendar();
 });
@@ -1011,19 +1192,20 @@ document.getElementById('btnTambahAktiviti').addEventListener('click',function()
 // Edit from detail panel
 document.getElementById('calDetailEdit').addEventListener('click',function(){
   if(calDetailEventId===null) return;
-  var ev=takwimData.find(function(e){return e.id===calDetailEventId;});
+  var ev = takwimData.find(function(e){return e.id===calDetailEventId;});
   if(!ev) return;
-  takwimEditId=ev.id;
-  document.getElementById('tDate').value=ev.year+'-'+pad2(ev.month+1)+'-'+pad2(ev.day);
-  document.getElementById('tNama').value=ev.nama;
-  document.getElementById('tLokasi').value=ev.lokasi;
-  document.getElementById('tStatus').value=ev.status;
-  document.getElementById('modalTakwimTitle').textContent='Edit Aktiviti';
+  takwimEditId = ev.id;
+  document.getElementById('tDate').value   = ev.year+'-'+pad2(ev.month+1)+'-'+pad2(ev.day);
+  document.getElementById('tNama').value   = ev.nama;
+  document.getElementById('tLokasi').value = ev.lokasi;
+  document.getElementById('tKat').value    = ev.kat||'lain';
+  document.getElementById('tStatus').value = ev.status;
+  document.getElementById('modalTakwimTitle').textContent = 'Edit Aktiviti';
   document.getElementById('modalTakwim').classList.add('open');
 });
 document.getElementById('calDetailDel').addEventListener('click',function(){
   if(calDetailEventId===null) return;
-  var ev=takwimData.find(function(e){return e.id===calDetailEventId;});
+  var ev = takwimData.find(function(e){return e.id===calDetailEventId;});
   if(!ev) return;
   showConfirm('Padam aktiviti "'+ev.nama+'"?',function(){
     takwimData=takwimData.filter(function(e){return e.id!==calDetailEventId;});
@@ -1033,12 +1215,17 @@ document.getElementById('calDetailDel').addEventListener('click',function(){
 document.getElementById('btnBatalTakwim').addEventListener('click',function(){ document.getElementById('modalTakwim').classList.remove('open'); });
 document.getElementById('modalTakwim').addEventListener('click',function(e){ if(e.target===document.getElementById('modalTakwim')) document.getElementById('modalTakwim').classList.remove('open'); });
 document.getElementById('btnSimpanTakwim').addEventListener('click',function(){
-  var dateVal=document.getElementById('tDate').value;
-  var nama=document.getElementById('tNama').value.trim();
+  var dateVal = document.getElementById('tDate').value;
+  var nama    = document.getElementById('tNama').value.trim();
   if(!dateVal||!nama) return;
-  var parts=dateVal.split('-');
-  var ev=takwimData.find(function(e){return e.id===takwimEditId;});
-  if(ev){ ev.year=parseInt(parts[0]);ev.month=parseInt(parts[1])-1;ev.day=parseInt(parts[2]);ev.nama=nama;ev.lokasi=document.getElementById('tLokasi').value.trim()||'—';ev.status=document.getElementById('tStatus').value; }
+  var parts = dateVal.split('-');
+  var ev = takwimData.find(function(e){return e.id===takwimEditId;});
+  if(ev){
+    ev.year=parseInt(parts[0]); ev.month=parseInt(parts[1])-1; ev.day=parseInt(parts[2]);
+    ev.nama=nama; ev.lokasi=document.getElementById('tLokasi').value.trim()||'—';
+    ev.kat=document.getElementById('tKat').value;
+    ev.status=document.getElementById('tStatus').value;
+  }
   saveTakwim();
   document.getElementById('modalTakwim').classList.remove('open');
   calDetailEventId=null;
