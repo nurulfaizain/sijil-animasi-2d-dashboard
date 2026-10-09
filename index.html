@@ -1212,11 +1212,167 @@ function updateHomeAktiviti(){
 }
 
 // ══════════════════════════════════════════════════
+// CHECKLIST
+// ══════════════════════════════════════════════════
+var CL_KEY = 'sdd_checklist';
+var CL_NID = 'sdd_checklist_nid';
+var DEFAULT_CL = [
+  {id:1,text:'Semak jadual pengajaran semester baharu',done:true},
+  {id:2,text:'Kemaskini rekod pelajar terkini',done:false},
+  {id:3,text:'Sediakan bahan bengkel storyboard',done:false},
+  {id:4,text:'Hantar laporan bajet bulanan',done:true},
+  {id:5,text:'Tempah makmal komputer untuk kelas animasi',done:false},
+];
+var clData   = lsGet(CL_KEY, DEFAULT_CL);
+var clNextId = lsGet(CL_NID, 10);
+
+function saveCL(){ lsSet(CL_KEY, clData); lsSet(CL_NID, clNextId); }
+
+function renderCL(){
+  var list = document.getElementById('clList');
+  if(!list) return;
+  list.innerHTML = '';
+  var total = clData.length;
+  var done  = clData.filter(function(i){ return i.done; }).length;
+  var pct   = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  // progress bar & %
+  var pctEl  = document.getElementById('clPct');
+  var fillEl = document.getElementById('clProgFill');
+  if(pctEl)  pctEl.textContent  = pct + '%';
+  if(fillEl) fillEl.style.width = pct + '%';
+
+  // Tasks summary card
+  var tv = document.getElementById('homeTasksValue');
+  var ts = document.getElementById('homeTasksSub');
+  var tb = document.getElementById('homeTasksBar');
+  var tt = document.getElementById('homeTasksTrend');
+  if(tv) tv.textContent      = done + '/' + total;
+  if(ts) ts.textContent      = pct + '% tugas telah diselesaikan';
+  if(tb) tb.style.width      = pct + '%';
+  if(tt) tt.textContent      = done + ' selesai';
+
+  // empty state
+  if(total === 0){
+    list.innerHTML = '<div class="checklist-empty">Tiada tugasan. Tambah tugasan baharu di atas.</div>';
+    return;
+  }
+
+  clData.forEach(function(item){
+    var li = document.createElement('div');
+    li.className = 'cl-item' + (item.done ? ' done' : '');
+    li.innerHTML =
+      '<div class="cl-checkbox" data-id="' + item.id + '">' +
+        (item.done ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '') +
+      '</div>' +
+      '<span class="cl-text">' + item.text + '</span>' +
+      '<button class="cl-del" data-id="' + item.id + '" title="Padam">&#x2715;</button>';
+    list.appendChild(li);
+  });
+
+  list.querySelectorAll('.cl-checkbox').forEach(function(cb){
+    cb.addEventListener('click', function(){
+      var id = parseInt(cb.dataset.id);
+      var it = clData.find(function(i){ return i.id === id; });
+      if(it){ it.done = !it.done; saveCL(); renderCL(); }
+    });
+  });
+  list.querySelectorAll('.cl-del').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var id = parseInt(btn.dataset.id);
+      clData = clData.filter(function(i){ return i.id !== id; });
+      saveCL(); renderCL();
+    });
+  });
+}
+
+document.getElementById('clAddBtn').addEventListener('click', function(){
+  var inp = document.getElementById('clInput');
+  var txt = inp.value.trim();
+  if(!txt){ inp.focus(); return; }
+  clData.push({ id: clNextId++, text: txt, done: false });
+  saveCL(); renderCL();
+  inp.value = '';
+  inp.focus();
+});
+document.getElementById('clInput').addEventListener('keydown', function(e){
+  if(e.key === 'Enter') document.getElementById('clAddBtn').click();
+});
+
+// ══════════════════════════════════════════════════
+// HOME — Workshop card (reads from takwimData)
+// ══════════════════════════════════════════════════
+function updateWorkshopCard(){
+  var now = new Date(); now.setHours(0,0,0,0);
+  var upcoming = takwimData.filter(function(e){
+    return new Date(e.year, e.month, e.day) >= now && e.status !== 'selesai';
+  });
+  var total   = takwimData.length;
+  var selesai = takwimData.filter(function(e){ return e.status === 'selesai'; }).length;
+  var pct     = total > 0 ? Math.round((selesai / total) * 100) : 0;
+
+  var av = document.getElementById('homeAktiviti');
+  var as = document.getElementById('homeAktivitiSub');
+  var wb = document.getElementById('homeWorkshopBar');
+  var wt = document.getElementById('homeWorkshopTrend');
+  if(av) av.textContent = upcoming.length;
+  if(as){
+    if(upcoming.length > 0){
+      var nxt = upcoming.sort(function(a,b){ return new Date(a.year,a.month,a.day)-new Date(b.year,b.month,b.day); })[0];
+      as.textContent = 'Seterusnya: ' + nxt.nama + ' (' + pad2(nxt.day) + ' ' + namaBulan[nxt.month] + ')';
+    } else {
+      as.textContent = 'Tiada aktiviti akan datang';
+    }
+  }
+  if(wb) wb.style.width = pct + '%';
+  if(wt) wt.textContent = upcoming.length > 0 ? upcoming.length + ' akan datang' : 'Tiada lagi';
+}
+
+// ══════════════════════════════════════════════════
+// HOME — Students card (reads from pelajarData)
+// ══════════════════════════════════════════════════
+function updateStudentsCard(){
+  var sessions = getSesiList();
+  if(!sessions.length) return;
+  var latest   = sessions[sessions.length - 1];
+  var prev     = sessions.length > 1 ? sessions[sessions.length - 2] : null;
+  var lsTotal  = pelajarData.filter(function(r){ return r.sesi === latest; })
+                            .reduce(function(a,r){ return a + r.bil; }, 0);
+  var maxP = Math.max.apply(null, sessions.map(function(s){
+    return pelajarData.filter(function(r){ return r.sesi === s; })
+                      .reduce(function(a,r){ return a + r.bil; }, 0);
+  }));
+
+  var hp  = document.getElementById('homeBilPelajar');
+  var hps = document.getElementById('homePelajarSub');
+  var bar = document.getElementById('homeStudentsBar');
+  var trd = document.getElementById('homeStudentsTrend');
+  if(hp)  hp.textContent  = lsTotal;
+  if(hps) hps.textContent = 'Sesi terkini: ' + latest;
+  if(bar) bar.style.width = (maxP > 0 ? Math.round((lsTotal / maxP) * 100) : 0) + '%';
+  if(trd && prev){
+    var prevTotal = pelajarData.filter(function(r){ return r.sesi === prev; })
+                               .reduce(function(a,r){ return a + r.bil; }, 0);
+    var diff = lsTotal - prevTotal;
+    trd.textContent = (diff >= 0 ? '↑ +' : '↓ ') + diff + ' pelajar';
+    trd.className   = 'sum-card-trend ' + (diff >= 0 ? 'trend-up' : 'trend-warn');
+  }
+}
+
+// patch renderCalendar & renderPelajar to also refresh home cards
+var _origRenderCalendar = renderCalendar;
+renderCalendar = function(){ _origRenderCalendar(); updateWorkshopCard(); };
+
+var _origRenderPelajar = renderPelajar;
+renderPelajar = function(){ _origRenderPelajar(); updateStudentsCard(); };
+
+// ══════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════
 renderBajet();
 renderCalendar();
 renderPelajar();
+renderCL();
 </script>
 </body>
 </html>
