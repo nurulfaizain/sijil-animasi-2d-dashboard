@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="ms-MY">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Dashboard Pengurusan — Sijil Animasi 2D (SDD)</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:      #F5F7FB;
+  --white:   #FFFFFF;
+  --navy:    #172554;
+  --navy2:   #1e3a8a;
+  --purple:  #794BEB;
+  --purp2:   #a78bfa;
+  --purp-bg: #ede9fe;
+  --text:    #172554;
+  --muted:   #64748b;
+  --border:  #e2e8f0;
+  --shadow:  0 1px 4px rgba(23,37,84,.08);
+  --shadow2: 0 4px 16px rgba(23,37,84,.12);
+  --radius:  14px;
+  --font:    -apple-system,"Segoe UI",system-ui,sans-serif;
+  --green:   #16a34a; --green-bg:#dcfce7;
+  --amber:   #b45309; --amber-bg:#fef9c3;
+  --indigo:  #4338ca; --indigo-bg:#e0e7ff;
+  --red:     #dc2626; --red-bg:#fee2e2;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;font-size:15px}
+
+/* ── HEADER ── */
+header{background:var(--white);border-bottom:1px solid var(--border);padding:0 24px;height:62px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--purple),var(--purp2));border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.brand-title{font-size:15px;font-weight:800;color:var(--navy)}
+.brand-title span{color:var(--purple)}
+.brand-sub{font-size:11px;color:var(--muted)}
+.header-right{display:flex;align-items:center;gap:12px}
+.badge{background:linear-gradient(135deg,var(--purple),var(--purp2));border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#fff}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--navy2));border:2px solid var(--purp2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff}
+#menuToggle{display:none;background:none;border:none;color:var(--navy);cursor:pointer;padding:6px}
+
+/* ── LAYOUT ── */
+#app{display:flex;flex:1;min-height:0}
+#sidebar{width:220px;flex-shrink:0;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 0;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto;box-shadow:var(--shadow);justify-content:space-between}
+.sb-nav{display:flex;flex-direction:column}
+.sb-mascot{padding:16px 14px 12px;border-top:1px solid var(--border);text-align:center}
+.sb-mascot svg{width:80px;height:94px;filter:drop-shadow(0 3px 8px rgba(121,75,235,.2))}
+.sb-mascot-label{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-top:4px}
+.sb-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:0 18px 8px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 18px;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;border-left:3px solid transparent;transition:all .15s;user-select:none;border-radius:0 8px 8px 0;margin:0 6px 2px 0}
+.sb-item:hover{background:var(--purp-bg);color:var(--purple)}
+.sb-item.active{background:var(--purp-bg);color:var(--purple);border-left-color:var(--purple);font-weight:700}
+#content{flex:1;min-width:0;overflow-y:auto}
+main{padding:28px 28px;max-width:1180px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+.module-section{display:none}.module-section.active{display:block}
+
+/* ── SHARED ── */
+.panel{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.panel-header{padding:16px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.panel-title{font-size:15px;font-weight:800;color:var(--navy);display:flex;align-items:center;gap:8px}
+.panel-body{padding:20px 22px}
+.section-label{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--purple);margin-bottom:12px}
+.section-label::after{content:"";flex:1;height:1px;background:var(--border)}
+h2.mod-title{font-size:20px;font-weight:800;color:var(--navy);margin-bottom:20px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:none;border-radius:9px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .15s,transform .1s;font-family:var(--font)}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+.btn-primary{background:linear-gradient(135deg,var(--purple),var(--purp2));color:#fff}
+.btn-sm{padding:5px 11px;font-size:12px;border-radius:7px}
+.btn-edit-rec{background:var(--purp-bg);color:var(--purple);border:1px solid var(--purp2)}
+.btn-del-rec{background:var(--red-bg);color:var(--red);border:1px solid #fca5a5}
+.form-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:5px;display:block}
+.form-input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:9px 13px;font-size:14px;color:var(--navy);font-family:var(--font);transition:border-color .18s}
+.form-input:focus{outline:none;border-color:var(--purple)}
+.form-group{margin-bottom:14px}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(23,37,84,.35);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:28px;width:100%;max-width:460px;box-shadow:var(--shadow2)}
+.modal h3{font-size:17px;font-weight:800;color:var(--navy);margin-bottom:20px}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+.btn-cancel{background:var(--bg);border:1.5px solid var(--border);color:var(--muted);border-radius:9px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer}
+
+/* ── CONFIRM DIALOG ── */
+.confirm-overlay{position:fixed;inset:0;background:rgba(23,37,84,.4);z-index:600;display:none;align-items:center;justify-content:center;padding:20px}
+.confirm-overlay.open{display:flex}
+.confirm-box{background:var(--white);border-radius:var(--radius);padding:28px;max-width:360px;width:100%;box-shadow:var(--shadow2);text-align:center}
+.confirm-box p{font-size:15px;color:var(--navy);margin-bottom:20px;font-weight:600}
+.confirm-box .confirm-btns{display:flex;gap:10px;justify-content:center}
+.btn-confirm-del{background:var(--red);color:#fff;border:none;border-radius:9px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer}
+.btn-confirm-cancel{background:var(--bg);border:1.5px solid var(--border);color:var(--muted);border-radius:9px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer}
+
+/* ── STATUS PILLS ── */
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:4px 12px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.pill-selesai{background:var(--green-bg);color:var(--green)}
+.pill-rancang{background:var(--amber-bg);color:var(--amber)}
+.pill-belum{background:var(--indigo-bg);color:var(--indigo)}
+
+/* ─────────────── DASHBOARD UTAMA ─────────────── */
+@keyframes mascot-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* Welcome banner — deep navy gradient */
+.welcome-card{background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 55%,#2d1b69 100%);border:none;border-radius:var(--radius);padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;overflow:hidden;position:relative;margin-bottom:24px;box-shadow:0 8px 32px rgba(15,23,42,.35)}
+.welcome-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,#a78bfa,#7c3aed);border-radius:var(--radius) 0 0 var(--radius)}
+.welcome-card::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(167,139,250,.08);pointer-events:none}
+.welcome-text{flex:1;min-width:0;padding-left:8px;z-index:1}
+.welcome-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(167,139,250,.18);color:#c4b5fd;border:1px solid rgba(167,139,250,.3);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px}
+.welcome-text h2{font-size:22px;font-weight:800;color:#ffffff;margin-bottom:5px;line-height:1.2}
+.welcome-text h2 span{color:#a78bfa}
+.welcome-sub{font-size:13px;color:rgba(255,255,255,.6);font-weight:500}
+.welcome-sub strong{color:rgba(255,255,255,.9);font-weight:700}
+.mascot-wrap{flex-shrink:0;width:120px;height:140px;position:relative;z-index:1}
+.mascot-wrap svg{width:100%;height:100%;filter:drop-shadow(0 4px 16px rgba(167,139,250,.4));animation:mascot-float 3s ease-in-out infinite}
+
+/* Summary cards — 3-column premium */
+.summary-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:24px}
+.sum-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:22px 22px 20px;box-shadow:var(--shadow);transition:box-shadow .22s,transform .22s;position:relative;overflow:hidden}
+.sum-card::after{content:"";position:absolute;right:-18px;bottom:-18px;width:80px;height:80px;border-radius:50%;opacity:.06;pointer-events:none}
+.sum-card-students::after{background:var(--purple)}
+.sum-card-tasks::after{background:#0ea5e9}
+.sum-card-workshop::after{background:#16a34a}
+.sum-card:hover{box-shadow:var(--shadow2);transform:translateY(-3px)}
+.sum-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.sum-card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ic-navy{background:linear-gradient(135deg,#1e1b4b,#312e81)}
+.ic-sky{background:linear-gradient(135deg,#0c4a6e,#0369a1)}
+.ic-green{background:linear-gradient(135deg,#14532d,#166534)}
+.sum-card-trend{font-size:11px;font-weight:700;border-radius:20px;padding:3px 9px}
+.trend-up{background:#dcfce7;color:#16a34a}
+.trend-warn{background:#fef9c3;color:#b45309}
+.trend-ok{background:var(--purp-bg);color:var(--purple)}
+.sum-card-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:4px}
+.sum-card-value{font-size:32px;font-weight:900;line-height:1;margin-bottom:6px;letter-spacing:-1px}
+.sum-card-sub{font-size:12px;color:var(--muted);line-height:1.5}
+.sum-card-bar{height:4px;border-radius:4px;background:var(--border);margin-top:14px;overflow:hidden}
+.sum-card-bar-fill{height:100%;border-radius:4px;transition:width .6s}
+
+/* Checklist panel */
+.checklist-panel{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.checklist-header{background:linear-gradient(135deg,#0f172a,#1e1b4b);padding:16px 22px;display:flex;align-items:center;justify-content:space-between}
+.checklist-header-left{display:flex;align-items:center;gap:10px}
+.checklist-header-title{font-size:14px;font-weight:800;color:#fff}
+.checklist-header-sub{font-size:11px;color:rgba(255,255,255,.55);font-weight:500}
+.checklist-progress-wrap{display:flex;align-items:center;gap:10px}
+.checklist-pct{font-size:13px;font-weight:800;color:#a78bfa}
+.checklist-prog-track{width:80px;height:6px;border-radius:6px;background:rgba(255,255,255,.15);overflow:hidden}
+.checklist-prog-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#a78bfa,#7c3aed);transition:width .4s}
+.checklist-body{padding:18px 22px}
+.checklist-add{display:flex;gap:10px;margin-bottom:16px}
+.checklist-add input{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:9px 13px;font-size:13.5px;color:var(--navy);font-family:var(--font);transition:border-color .18s}
+.checklist-add input:focus{outline:none;border-color:var(--purple)}
+.checklist-add button{background:linear-gradient(135deg,var(--purple),var(--purp2));color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font);transition:opacity .15s,transform .1s}
+.checklist-add button:hover{opacity:.87;transform:translateY(-1px)}
+.checklist-list{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto}
+.checklist-list::-webkit-scrollbar{width:4px}
+.checklist-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.cl-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);transition:background .15s,border-color .15s;cursor:default}
+.cl-item.done{background:#f0fdf4;border-color:#86efac}
+.cl-item.done .cl-text{text-decoration:line-through;color:var(--muted)}
+.cl-checkbox{width:20px;height:20px;border-radius:6px;border:2px solid var(--border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;background:var(--white)}
+.cl-item.done .cl-checkbox{background:linear-gradient(135deg,#16a34a,#22c55e);border-color:#16a34a}
+.cl-text{flex:1;font-size:13.5px;font-weight:600;color:var(--navy)}
+.cl-del{background:none;border:none;cursor:pointer;color:var(--muted);padding:3px 5px;border-radius:5px;font-size:14px;line-height:1;transition:color .15s,background .15s;font-family:var(--font)}
+.cl-del:hover{color:var(--red);background:var(--red-bg)}
+.checklist-empty{text-align:center;padding:28px 0;color:var(--muted);font-size:13px}
+.ic-purple{background:var(--purp-bg)}
+.ic-amber{background:var(--amber-bg)}
+
+/* ─────────────── BAJET ─────────────── */
+.bajet-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:24px}
+.baj-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:20px 22px;box-shadow:var(--shadow);transition:box-shadow .2s,transform .2s}
+.baj-card:hover{box-shadow:var(--shadow2);transform:translateY(-2px)}
+.baj-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.baj-icon-purple{background:var(--purp-bg)}.baj-icon-amber{background:var(--amber-bg)}.baj-icon-green{background:var(--green-bg)}
+.baj-card-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:6px}
+.baj-card-value{font-size:28px;font-weight:800;line-height:1;margin-bottom:4px}
+.baj-card-sub{font-size:11.5px;color:var(--muted)}
+.baj-alloc{color:var(--purple)}.baj-spent{color:var(--amber)}.baj-bal{color:var(--green)}
+.baj-bar{margin-top:10px;height:6px;border-radius:6px;background:var(--border);overflow:hidden}
+.baj-bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--purple),var(--purp2));transition:width .4s}
+/* Bar chart */
+.chart-panel{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:20px 22px;box-shadow:var(--shadow);margin-bottom:22px}
+.chart-panel-title{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.chart-legend-items{display:flex;gap:16px;align-items:center}
+.cli{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);font-weight:600}
+.cli-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.bar-chart-wrap{overflow-x:auto;padding-bottom:4px}
+.bar-chart{display:flex;align-items:flex-end;gap:0;min-height:180px;padding:0 8px}
+.bar-group{display:flex;flex-direction:column;align-items:center;flex:1;min-width:60px;gap:0}
+.bar-group-bars{display:flex;align-items:flex-end;gap:4px;width:100%;justify-content:center;position:relative}
+.bar{border-radius:6px 6px 0 0;min-width:18px;max-width:32px;flex:1;position:relative;cursor:pointer;transition:filter .15s}
+.bar:hover{filter:brightness(.88)}
+.bar-val{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:700;white-space:nowrap;color:var(--navy)}
+.bar-peruntukan{background:linear-gradient(180deg,var(--purple),#5c3bc4)}
+.bar-belanja{background:linear-gradient(180deg,var(--purp2),#c4b5fd)}
+.bar-label{font-size:10px;color:var(--muted);font-weight:600;margin-top:8px;text-align:center;word-break:break-word;max-width:70px;line-height:1.3}
+/* Tooltip */
+.bar-tooltip{position:fixed;background:var(--navy);color:#fff;padding:6px 10px;border-radius:8px;font-size:12px;pointer-events:none;z-index:999;white-space:nowrap;display:none;box-shadow:var(--shadow2)}
+/* Table */
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:2px solid var(--border);background:var(--bg)}
+.tbl td{padding:12px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tbody tr:hover td{background:#f8f5ff}
+.tbl-wrap{overflow-x:auto}
+.row-bar-wrap{width:80px;height:6px;background:var(--border);border-radius:6px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:6px}
+.row-bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--purple),var(--purp2));transition:width .4s}
+.pct-cell{display:flex;align-items:center;gap:6px;white-space:nowrap;font-weight:700;font-size:13px}
+
+/* ─────────────── CALENDAR ─────────────── */
+.cal-add-form{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:20px}
+.cal-add-form .form-group{margin-bottom:0;flex:1;min-width:140px}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cal-month-label{font-size:18px;font-weight:800;color:var(--navy)}
+.cal-btn{background:var(--bg);border:1.5px solid var(--border);color:var(--navy);border-radius:9px;width:34px;height:34px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.cal-btn:hover{background:var(--purp-bg);color:var(--purple)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-day-hdr{text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:7px 0}
+.cal-cell{aspect-ratio:1;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;font-weight:600;cursor:default;position:relative;transition:transform .15s,background .15s;color:var(--muted)}
+.cal-cell:not(.empty):not(.has-event):hover{background:var(--bg)}
+.cal-cell.today{outline:2px solid var(--purple);outline-offset:1px;color:var(--purple);font-weight:800}
+.cal-cell.has-event.ev-selesai{background:#dcfce7;border:1.5px solid #86efac;color:#166534;cursor:pointer}
+.cal-cell.has-event.ev-rancang{background:#fef9c3;border:1.5px solid #fde047;color:#854d0e;cursor:pointer}
+.cal-cell.has-event.ev-belum{background:#e0e7ff;border:1.5px solid #a5b4fc;color:#3730a3;cursor:pointer}
+.cal-cell.has-event:hover{transform:scale(1.08)}
+.cal-dot{width:5px;height:5px;border-radius:50%;margin-top:2px}
+.cal-detail{margin-top:18px;border-radius:12px;padding:16px 18px;display:none}
+.cal-detail.visible{display:block}
+.cal-detail.ev-selesai{background:#dcfce7;border:1.5px solid #86efac}
+.cal-detail.ev-rancang{background:#fef9c3;border:1.5px solid #fde047}
+.cal-detail.ev-belum{background:#e0e7ff;border:1.5px solid #a5b4fc}
+.cal-detail-title{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:3px}
+.cal-detail-loc{font-size:12px;color:var(--muted);margin-bottom:10px}
+.cal-detail-actions{display:flex;gap:8px;margin-top:10px}
+.legend-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;align-items:center}
+
+/* ─────────────── PELAJAR ─────────────── */
+.pelajar-toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+.pelajar-toolbar select{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--navy);font-family:var(--font);cursor:pointer}
+.pelajar-toolbar select:focus{outline:none;border-color:var(--purple)}
+.pelajar-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+.ps-card{background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;text-align:center}
+.ps-val{font-size:26px;font-weight:800;color:var(--purple);line-height:1;margin-bottom:3px}
+.ps-lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.chart-area{display:flex;flex-direction:column;gap:14px;margin-bottom:18px}
+.chart-row{display:grid;grid-template-columns:120px 1fr 60px;align-items:center;gap:12px}
+.chart-sess{font-size:12px;font-weight:700;color:var(--muted)}
+.chart-track{height:26px;border-radius:6px;background:var(--bg);overflow:hidden;border:1px solid var(--border)}
+.chart-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--purple),var(--purp2));display:flex;align-items:center;padding-left:8px;font-size:12px;font-weight:700;color:#fff;transition:width .5s}
+.chart-count{font-size:16px;font-weight:800;color:var(--purple);text-align:right}
+.data-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;border-radius:6px;padding:2px 7px;text-transform:uppercase;letter-spacing:.5px}
+.tag-sim{background:#fef9c3;color:#854d0e}
+.tag-real{background:var(--purp-bg);color:var(--purple)}
+
+/* ─────────────── RESPONSIVE ─────────────── */
+@media(max-width:900px){.bajet-summary,.summary-cards{grid-template-columns:1fr 1fr}.pelajar-stats{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){
+  #sidebar{position:fixed;left:-220px;top:62px;height:calc(100vh - 62px);z-index:150;transition:left .25s;box-shadow:var(--shadow2)}
+  #sidebar.open{left:0}
+  #menuToggle{display:flex}
+  footer{margin-left:0!important}
+}
+@media(max-width:600px){
+  main{padding:16px}
+  .bajet-summary,.summary-cards,.pelajar-stats{grid-template-columns:1fr}
+  .chart-row{grid-template-columns:90px 1fr 50px}
+  .welcome-card{flex-direction:column;text-align:center;padding:20px 20px}
+  .welcome-card::before{width:100%;height:4px;top:0;left:0;bottom:auto;border-radius:var(--radius) var(--radius) 0 0}
+  .welcome-text{padding-left:0}
+  .mascot-wrap{width:90px;height:106px}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="brand">
+    <button id="menuToggle" aria-label="Menu"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    <div class="brand-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="white" stroke-width="1.7"/><path d="M7.5 7.5L14 10L7.5 12.5V7.5Z" fill="white"/></svg></div>
+    <div>
+      <div class="brand-title">Sijil <span>Animasi 2D</span></div>
+      <div class="brand-sub">Kolej Komuniti Kuala Langat</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="badge">SDD</div>
+    <div class="avatar">KP</div>
+  </div>
+</header>
+
+<div id="app">
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sb-nav">
+    <div class="sb-section">Menu Utama</div>
+    <div class="sb-item active" data-target="sec-utama">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
+      Dashboard Utama
+    </div>
+    <div class="sb-section" style="margin-top:14px">Modul</div>
+    <div class="sb-item" data-target="sec-bajet">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 4.5v7M5.5 6.5c0-1.1.9-2 2.5-2s2.5.9 2.5 2-.9 1.5-2.5 1.5S5.5 9.1 5.5 10c0 1.1.9 2 2.5 2s2.5-.9 2.5-2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Bajet Program SDD
+    </div>
+    <div class="sb-item" data-target="sec-takwim">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="2.5" width="13" height="12" rx="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 1.5v2M11 1.5v2M1.5 6.5h13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Takwim Aktiviti SDD
+    </div>
+    <div class="sb-item" data-target="sec-pelajar">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Bilangan Pelajar
+    </div>
+  </div>
+  <!-- Mascot at sidebar bottom -->
+  <div class="sb-mascot">
+    <svg viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="30" y="72" width="60" height="58" rx="10" fill="#2d4cc8" stroke="#1a2e8a" stroke-width="1.5"/>
+      <rect x="25" y="105" width="70" height="28" rx="6" fill="#4338ca" stroke="#1a2e8a" stroke-width="1.2"/>
+      <rect x="30" y="108" width="8" height="8" rx="1.5" fill="#d97706" opacity=".7"/><rect x="42" y="108" width="8" height="8" rx="1.5" fill="#d97706" opacity=".6"/><rect x="54" y="108" width="8" height="8" rx="1.5" fill="#d97706" opacity=".7"/><rect x="66" y="108" width="8" height="8" rx="1.5" fill="#d97706" opacity=".6"/><rect x="78" y="108" width="8" height="8" rx="1.5" fill="#d97706" opacity=".7"/>
+      <rect x="36" y="118" width="8" height="8" rx="1.5" fill="#d97706" opacity=".5"/><rect x="48" y="118" width="8" height="8" rx="1.5" fill="#d97706" opacity=".6"/><rect x="60" y="118" width="8" height="8" rx="1.5" fill="#d97706" opacity=".5"/><rect x="72" y="118" width="8" height="8" rx="1.5" fill="#d97706" opacity=".6"/>
+      <rect x="25" y="130" width="70" height="4" rx="2" fill="#d97706" opacity=".8"/>
+      <circle cx="60" cy="83" r="2.5" fill="white" opacity=".8"/><circle cx="60" cy="91" r="2.5" fill="white" opacity=".8"/>
+      <rect x="72" y="79" width="16" height="11" rx="2" fill="#1d4ed8"/><rect x="72" y="79" width="16" height="4" rx="1" fill="#ea580c"/><rect x="72" y="83" width="16" height="4" fill="#d97706"/><rect x="72" y="87" width="16" height="3" rx="1" fill="#2563eb"/>
+      <text x="74" y="85.5" font-size="3" fill="white" font-family="sans-serif" font-weight="700">KKKL</text><text x="72.5" y="90" font-size="2.5" fill="white" font-family="sans-serif" font-weight="600">ANIMASI</text>
+      <rect x="10" y="74" width="22" height="14" rx="7" fill="#2d4cc8" stroke="#1a2e8a" stroke-width="1.2" transform="rotate(15,21,81)"/>
+      <ellipse cx="12" cy="93" rx="8" ry="9" fill="#f5c887" stroke="#d4a055" stroke-width="1.2"/>
+      <rect x="88" y="74" width="22" height="14" rx="7" fill="#2d4cc8" stroke="#1a2e8a" stroke-width="1.2" transform="rotate(-15,99,81)"/>
+      <ellipse cx="109" cy="93" rx="8" ry="9" fill="#f5c887" stroke="#d4a055" stroke-width="1.2"/>
+      <rect x="35" y="128" width="20" height="26" rx="8" fill="#2d4cc8" stroke="#1a2e8a" stroke-width="1.2"/><rect x="65" y="128" width="20" height="26" rx="8" fill="#2d4cc8" stroke="#1a2e8a" stroke-width="1.2"/>
+      <ellipse cx="45" cy="154" rx="12" ry="6" fill="#1a2e8a"/><ellipse cx="75" cy="154" rx="12" ry="6" fill="#1a2e8a"/>
+      <rect x="28" y="30" width="64" height="52" rx="12" fill="#f5c887" stroke="#d4a055" stroke-width="1.5"/>
+      <ellipse cx="40" cy="62" rx="7" ry="5" fill="#f9a8d4" opacity=".5"/><ellipse cx="80" cy="62" rx="7" ry="5" fill="#f9a8d4" opacity=".5"/>
+      <ellipse cx="47" cy="52" rx="8" ry="9" fill="#111"/><ellipse cx="73" cy="52" rx="8" ry="9" fill="#111"/>
+      <ellipse cx="50" cy="49" rx="2.5" ry="3" fill="white"/><ellipse cx="76" cy="49" rx="2.5" ry="3" fill="white"/>
+      <path d="M50 68 Q60 74 70 68" stroke="#c2754d" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+      <path d="M28 36 Q30 16 60 14 Q90 16 92 36 Z" fill="#7f8c8d" stroke="#555" stroke-width="1.2"/>
+      <path d="M28 36 Q30 16 45 14 Q35 22 32 36 Z" fill="#606c6d" opacity=".5"/>
+      <rect x="82" y="8" width="9" height="34" rx="3" fill="#ea580c" transform="rotate(25,86,25)"/><rect x="84" y="6" width="9" height="34" rx="3" fill="#2563eb" transform="rotate(28,88,23)"/>
+      <polygon points="96,38 100,32 104,42" fill="#f5c887"/>
+      <rect x="28" y="30" width="64" height="52" rx="12" fill="none" stroke="#c2754d" stroke-width="1.5"/>
+    </svg>
+    <div class="sb-mascot-label">Maskot SDD</div>
+  </div>
+</nav>
+
+<!-- CONTENT -->
+<div id="content">
+<main>
+
+  <!-- ═══ DASHBOARD UTAMA ═══ -->
+  <div class="module-section active" id="sec-utama">
+
+    <!-- Welcome Banner -->
+    <div class="welcome-card">
+      <div class="welcome-text">
+        <div class="welcome-badge">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1.4"/><path d="M5 3v2.5L6.5 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Portal Pengurusan
+        </div>
+        <h2>Selamat Datang ke Portal <span>Pengurusan SDD</span></h2>
+        <div class="welcome-sub"><strong>Sijil Animasi 2D</strong> &nbsp;|&nbsp; Kolej Komuniti Kuala Langat</div>
+      </div>
+      <!-- KKKL Animasi Mascot — inline SVG -->
+      <div class="mascot-wrap">
+        <svg viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- BODY / BAJU MELAYU BIRU -->
+          <rect x="30" y="72" width="60" height="58" rx="10" fill="#2d4cc8" stroke="#1a2e8a" stroke-width="1.5"/>
+          <!-- SAMPIN BATIK -->
+          <rect x="25" y="105" width="70" height="28" rx="6" fill="#4338ca" stroke="#1a2e8a" stroke-width="1.2"/>
+          <!-- batik pattern on sampin -->
+          <rect x="30" y="108" width="8" height="8" rx="1.5" fill="#d97706" opacity=".7"/>
+          <rect x="42" y="108" width="8" height="8" rx="1.5" fill="#d97706" opacity=".6"/>
+          <rect x="54" y="108" width="8" height="8" rx="1.5" fill="#d97706" opacity=".7"/>
+          <rect x="66" y="108" width="8" height="8" rx="1.5" fill="#d97706" opacity=".6"/>
+          <rect x="78" y="108" width="8" height="8" rx="1.5" fill="#d97706" opacity=".7"/>
+          <rect x="36" y="118" width="8" height="8" rx="1.5" fill="#d97706" opacity=".5"/>
+          <rect x="48" y="118" width="8" height="8" rx="1.5" fill="#d97706" opacity=".6"/>
+          <rect x="60" y="118" width="8" height="8" rx="1.5" fill="#d97706" opacity=".5"/>
+          <rect x="72" y="118" width="8" height="8" rx="1.5" fill="#d97706" opacity=".6"/>
+          <!-- SAMPIN BORDER GOLD -->
+          <rect x="25" y="130" width="70" height="4" rx="2" fill="#d97706" opacity=".8"/>
+          <!-- SHIRT BUTTONS -->
+          <circle cx="60" cy="83" r="2.5" fill="white" opacity=".8"/>
+          <circle cx="60" cy="91" r="2.5" fill="white" opacity=".8"/>
+          <!-- KKKL BADGE -->
+          <rect x="72" y="79" width="16" height="11" rx="2" fill="#1d4ed8"/>
+          <rect x="72" y="79" width="16" height="4" rx="1" fill="#ea580c"/>
+          <rect x="72" y="83" width="16" height="4" fill="#d97706"/>
+          <rect x="72" y="87" width="16" height="3" rx="1" fill="#2563eb"/>
+          <text x="74" y="85.5" font-size="3" fill="white" font-family="sans-serif" font-weight="700">KKKL</text>
+          <text x="72.5" y="90" font-size="2.5" fill="white" font-family="sans-serif" font-weight="600">ANIMASI</text>
+          <!-- ARMS -->
+          <!-- left arm -->
+          <rect x="10" y="74" width="22" height="14" rx="7" fill="#2d4cc8" stroke="#1a2e8a" stroke-width="1.2" transform="rotate(15,21,81)"/>
+          <!-- left hand -->
+          <ellipse cx="12" cy="93" rx="8" ry="9" fill="#f5c887" stroke="#d4a055" stroke-width="1.2"/>
+          <!-- right arm -->
+          <rect x="88" y="74" width="22" height="14" rx="7" fill="#2d4cc8" stroke="#1a2e8a" stroke-width="1.2" transform="rotate(-15,99,81)"/>
+          <!-- right hand -->
+          <ellipse cx="109" cy="93" rx="8" ry="9" fill="#f5c887" stroke="#d4a055" stroke-width="1.2"/>
+          <!-- LEGS -->
+          <rect x="35" y="128" width="20" height="26" rx="8" fill="#2d4cc8" stroke="#1a2e8a" stroke-width="1.2"/>
+          <rect x="65" y="128" width="20" height="26" rx="8" fill="#2d4cc8" stroke="#1a2e8a" stroke-width="1.2"/>
+          <!-- SHOES -->
+          <ellipse cx="45" cy="154" rx="12" ry="6" fill="#1a2e8a"/>
+          <ellipse cx="75" cy="154" rx="12" ry="6" fill="#1a2e8a"/>
+          <!-- HEAD — square/blocky -->
+          <rect x="28" y="30" width="64" height="52" rx="12" fill="#f5c887" stroke="#d4a055" stroke-width="1.5"/>
+          <!-- CHEEKS -->
+          <ellipse cx="40" cy="62" rx="7" ry="5" fill="#f9a8d4" opacity=".5"/>
+          <ellipse cx="80" cy="62" rx="7" ry="5" fill="#f9a8d4" opacity=".5"/>
+          <!-- EYES -->
+          <ellipse cx="47" cy="52" rx="8" ry="9" fill="#111"/>
+          <ellipse cx="73" cy="52" rx="8" ry="9" fill="#111"/>
+          <ellipse cx="50" cy="49" rx="2.5" ry="3" fill="white"/>
+          <ellipse cx="76" cy="49" rx="2.5" ry="3" fill="white"/>
+          <!-- SMILE -->
+          <path d="M50 68 Q60 74 70 68" stroke="#c2754d" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          <!-- SONGKOK / HEADGEAR -->
+          <!-- main songkok body -->
+          <path d="M28 36 Q30 16 60 14 Q90 16 92 36 Z" fill="#7f8c8d" stroke="#555" stroke-width="1.2"/>
+          <!-- songkok side shading -->
+          <path d="M28 36 Q30 16 45 14 Q35 22 32 36 Z" fill="#606c6d" opacity=".5"/>
+          <!-- orange/blue decoration (pencil crayons) -->
+          <rect x="82" y="8" width="9" height="34" rx="3" fill="#ea580c" transform="rotate(25,86,25)"/>
+          <rect x="84" y="6" width="9" height="34" rx="3" fill="#2563eb" transform="rotate(28,88,23)"/>
+          <!-- pencil tip -->
+          <polygon points="96,38 100,32 104,42" fill="#f5c887"/>
+          <!-- outline around head for cartoon look -->
+          <rect x="28" y="30" width="64" height="52" rx="12" fill="none" stroke="#c2754d" stroke-width="1.5"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 3 Summary Cards -->
+    <div class="summary-cards">
+
+      <!-- Card 1: Students -->
+      <div class="sum-card sum-card-students">
+        <div class="sum-card-top">
+          <div class="sum-card-icon ic-navy">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="8" r="3.8" stroke="#a78bfa" stroke-width="1.8"/><path d="M4 19c0-3.866 3.134-7 7-7h0c3.866 0 7 3.134 7 7" stroke="#a78bfa" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+          <span class="sum-card-trend trend-up" id="homeStudentsTrend">↑ Aktif</span>
+        </div>
+        <div class="sum-card-label">Pelajar Berdaftar</div>
+        <div class="sum-card-value" id="homeBilPelajar" style="color:var(--purple)">—</div>
+        <div class="sum-card-sub" id="homePelajarSub">—</div>
+        <div class="sum-card-bar"><div class="sum-card-bar-fill" id="homeStudentsBar" style="width:0%;background:linear-gradient(90deg,var(--purple),var(--purp2))"></div></div>
+      </div>
+
+      <!-- Card 2: Tasks -->
+      <div class="sum-card sum-card-tasks">
+        <div class="sum-card-top">
+          <div class="sum-card-icon ic-sky">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="16" height="16" rx="3.5" stroke="#7dd3fc" stroke-width="1.8"/><path d="M7 11l3 3 5-5" stroke="#7dd3fc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="sum-card-trend trend-ok" id="homeTasksTrend">— tugas</span>
+        </div>
+        <div class="sum-card-label">Tugasan / Checklist</div>
+        <div class="sum-card-value" id="homeTasksValue" style="color:#0284c7">—</div>
+        <div class="sum-card-sub" id="homeTasksSub">Selesai daripada semua tugas</div>
+        <div class="sum-card-bar"><div class="sum-card-bar-fill" id="homeTasksBar" style="width:0%;background:linear-gradient(90deg,#0284c7,#38bdf8)"></div></div>
+      </div>
+
+      <!-- Card 3: Workshop Status -->
+      <div class="sum-card sum-card-workshop">
+        <div class="sum-card-top">
+          <div class="sum-card-icon ic-green">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="4" width="16" height="15" rx="3" stroke="#86efac" stroke-width="1.8"/><path d="M7 3v2M15 3v2M3 9h16" stroke="#86efac" stroke-width="1.7" stroke-linecap="round"/><circle cx="8" cy="14" r="1.2" fill="#86efac"/><circle cx="11" cy="14" r="1.2" fill="#86efac"/><circle cx="14" cy="14" r="1.2" fill="#86efac"/></svg>
+          </div>
+          <span class="sum-card-trend trend-warn" id="homeWorkshopTrend">Akan Datang</span>
+        </div>
+        <div class="sum-card-label">Status Bengkel / Workshop</div>
+        <div class="sum-card-value" id="homeAktiviti" style="color:#16a34a">—</div>
+        <div class="sum-card-sub" id="homeAktivitiSub">—</div>
+        <div class="sum-card-bar"><div class="sum-card-bar-fill" id="homeWorkshopBar" style="width:0%;background:linear-gradient(90deg,#16a34a,#4ade80)"></div></div>
+      </div>
+
+    </div>
+
+    <!-- Interactive Checklist -->
+    <div class="checklist-panel">
+      <div class="checklist-header">
+        <div class="checklist-header-left">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" rx="3" stroke="#a78bfa" stroke-width="1.6"/><path d="M5.5 9l2.5 2.5 4.5-4.5" stroke="#a78bfa" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div>
+            <div class="checklist-header-title">Senarai Semak Program SDD</div>
+            <div class="checklist-header-sub">Kemas kini tugas dan tugasan anda di sini</div>
+          </div>
+        </div>
+        <div class="checklist-progress-wrap">
+          <span class="checklist-pct" id="clPct">0%</span>
+          <div class="checklist-prog-track"><div class="checklist-prog-fill" id="clProgFill" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="checklist-body">
+        <div class="checklist-add">
+          <input type="text" id="clInput" placeholder="Tambah tugasan baharu…" maxlength="120"/>
+          <button id="clAddBtn">+ Tambah</button>
+        </div>
+        <div class="checklist-list" id="clList"></div>
+      </div>
+    </div>
+
+    <!-- hidden home bajet sync targets (keep IDs alive for renderBajet) -->
+    <div style="display:none">
+      <span id="homeBakiBajet"></span><span id="homeBajetSub"></span>
+      <span id="homeAlloc"></span><span id="homeSpent"></span><span id="homeBal"></span>
+      <div id="homeBarFill"></div>
+    </div>
+
+  </div><!-- /sec-utama -->
+
+  <!-- ═══ BAJET ═══ -->
+  <div class="module-section" id="sec-bajet">
+    <div class="section-label"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h4M7 5v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Modul 1</div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Pemantauan Bajet Program SDD</span>
+        <button class="btn btn-primary" id="btnTambahBajet">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Tambah Peruntukan
+        </button>
+      </div>
+      <div class="panel-body">
+        <!-- Summary Cards -->
+        <div class="bajet-summary">
+          <div class="baj-card">
+            <div class="baj-icon baj-icon-purple"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#794BEB" stroke-width="1.7"/><path d="M10 5.5v9M7.5 7.5c0-1.1.9-2 2.5-2s2.5.9 2.5 2-.9 1.5-2.5 1.5S7.5 10.1 7.5 11c0 1.1.9 2 2.5 2s2.5-.9 2.5-2" stroke="#794BEB" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+            <div class="baj-card-label">Jumlah Peruntukan</div>
+            <div class="baj-card-value baj-alloc" id="bajetAlloc">—</div>
+            <div class="baj-card-sub" id="bajetAllocSub">Jumlah keseluruhan diperuntukkan</div>
+          </div>
+          <div class="baj-card">
+            <div class="baj-icon baj-icon-amber"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 14l3-3 3 3 6-6" stroke="#b45309" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="10" r="8" stroke="#b45309" stroke-width="1.7"/></svg></div>
+            <div class="baj-card-label">Jumlah Perbelanjaan</div>
+            <div class="baj-card-value baj-spent" id="bajetSpent">—</div>
+            <div class="baj-card-sub" id="bajetSpentSub">Jumlah telah dibelanjakan</div>
+          </div>
+          <div class="baj-card">
+            <div class="baj-icon baj-icon-green"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6 10l3 3 5-5" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="10" r="8" stroke="#16a34a" stroke-width="1.7"/></svg></div>
+            <div class="baj-card-label">Baki Bajet</div>
+            <div class="baj-card-value baj-bal" id="bajetBal">—</div>
+            <div class="baj-bar"><div class="baj-bar-fill" id="bajetBarFill" style="width:0%"></div></div>
+            <div id="bajetPct" style="font-size:11px;color:var(--muted);margin-top:4px"></div>
+          </div>
+        </div>
+
+        <!-- Bar Chart -->
+        <div class="chart-panel">
+          <div class="chart-panel-title">
+            Peruntukan vs Perbelanjaan Mengikut Kategori
+            <div class="chart-legend-items">
+              <div class="cli"><div class="cli-dot" style="background:var(--purple)"></div>Peruntukan</div>
+              <div class="cli"><div class="cli-dot" style="background:var(--purp2)"></div>Perbelanjaan</div>
+            </div>
+          </div>
+          <div class="bar-chart-wrap">
+            <div class="bar-chart" id="bajetBarChart"></div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr>
+              <th>Kategori / Item</th>
+              <th>Peruntukan (RM)</th>
+              <th>Perbelanjaan (RM)</th>
+              <th>Baki (RM)</th>
+              <th>% Digunakan</th>
+              <th>Tindakan</th>
+            </tr></thead>
+            <tbody id="bajetTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div><!-- /sec-bajet -->
+<!-- Tooltip element -->
+<div class="bar-tooltip" id="barTooltip"></div>
+
+  <!-- ═══ TAKWIM ═══ -->
+  <div class="module-section" id="sec-takwim">
+    <div class="section-label"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="11" rx="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 1v2M9.5 1v2M1 6h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Modul 2</div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Takwim Aktiviti SDD 2024/2025</span>
+      </div>
+      <div class="panel-body">
+        <!-- Add form -->
+        <div class="cal-add-form">
+          <div class="form-group"><label class="form-label">Tarikh</label><input class="form-input" type="date" id="calInDate"/></div>
+          <div class="form-group" style="flex:2;min-width:180px"><label class="form-label">Nama Aktiviti</label><input class="form-input" type="text" id="calInNama" placeholder="cth. Bengkel Storyboard"/></div>
+          <div class="form-group" style="flex:2;min-width:180px"><label class="form-label">Lokasi</label><input class="form-input" type="text" id="calInLokasi" placeholder="cth. Makmal A"/></div>
+          <div class="form-group" style="min-width:160px"><label class="form-label">Status</label>
+            <select class="form-input" id="calInStatus">
+              <option value="belum">Belum Mula</option>
+              <option value="rancang">Dalam Perancangan</option>
+              <option value="selesai">Selesai Dilaksanakan</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="btnTambahAktiviti" style="align-self:flex-end">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Tambah Aktiviti
+          </button>
+        </div>
+        <!-- Cal nav -->
+        <div class="cal-nav">
+          <button class="cal-btn" id="calPrev">&#8249;</button>
+          <span class="cal-month-label" id="calMonthLabel"></span>
+          <button class="cal-btn" id="calNext">&#8250;</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="cal-detail" id="calDetail">
+          <div class="cal-detail-title" id="calDetailTitle"></div>
+          <div class="cal-detail-loc" id="calDetailLoc"></div>
+          <span class="pill" id="calDetailStatus"></span>
+          <div class="cal-detail-actions">
+            <button class="btn btn-sm btn-edit-rec" id="calDetailEdit">Edit</button>
+            <button class="btn btn-sm btn-del-rec" id="calDetailDel">Padam</button>
+          </div>
+        </div>
+        <div class="legend-row">
+          <span class="pill pill-selesai">Selesai Dilaksanakan</span>
+          <span class="pill pill-rancang">Dalam Perancangan</span>
+          <span class="pill pill-belum">Belum Mula</span>
+        </div>
+      </div>
+    </div>
+  </div><!-- /sec-takwim -->
+
+  <!-- ═══ PELAJAR ═══ -->
+  <div class="module-section" id="sec-pelajar">
+    <div class="section-label"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="5" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M2 12c0-2.761 2.239-5 5-5s5 2.239 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Modul 3</div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Bilangan Pelajar Mengikut Sesi Akademik</span>
+        <button class="btn btn-primary" id="btnTambahSesi">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+          + Tambah Sesi
+        </button>
+      </div>
+      <div class="panel-body">
+        <div class="pelajar-toolbar">
+          <label class="form-label" style="margin:0;white-space:nowrap">Tapis Sesi:</label>
+          <select id="sesiFilter" class="form-input" style="width:auto;padding:7px 12px"></select>
+          <span id="filterTag" style="font-size:12px;color:var(--muted)"></span>
+        </div>
+        <div class="pelajar-stats">
+          <div class="ps-card"><div class="ps-val" id="psTotal">0</div><div class="ps-lbl">Jumlah Pelajar (Sesi Dipilih)</div></div>
+          <div class="ps-card"><div class="ps-val" id="psSem1">0</div><div class="ps-lbl">Semester 1</div></div>
+          <div class="ps-card"><div class="ps-val" id="psSem2">0</div><div class="ps-lbl">Semester 2</div></div>
+        </div>
+        <div class="chart-area" id="chartArea"></div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-top:6px">
+          <div style="width:14px;height:14px;border-radius:4px;background:linear-gradient(135deg,var(--purple),var(--purp2))"></div>
+          Bilangan pelajar berdaftar setiap semester
+        </div>
+        <div id="chartStats" style="display:flex;gap:20px;flex-wrap:wrap;margin-top:14px"></div>
+
+        <div style="margin-top:24px">
+          <div class="panel-title" style="font-size:14px;margin-bottom:12px">Rekod Enrolmen</div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Sesi Akademik</th><th>Semester</th><th>Bil. Pelajar</th><th>Jenis</th><th>Tindakan</th></tr></thead><tbody id="pelajarTbody"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /sec-pelajar -->
+
+</main>
+</div><!-- /content -->
+</div><!-- /app -->
+
+<footer style="margin-left:220px;text-align:center;padding:16px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--border);background:var(--white)">
+  Sistem Pengurusan Program &nbsp;|&nbsp; Sijil Animasi 2D (SDD) &nbsp;·&nbsp; Kolej Komuniti Kuala Langat &nbsp;·&nbsp; Made with IBM Bob
+</footer>
+
+<!-- ═══ MODAL BAJET ═══ -->
+<div class="modal-overlay" id="modalBajet">
+  <div class="modal">
+    <h3 id="modalBajetTitle">Tambah Peruntukan Bajet</h3>
+    <div class="form-group"><label class="form-label">Kategori / Item</label><input class="form-input" type="text" id="bKategori" placeholder="cth. Peralatan Studio"/></div>
+    <div class="form-group"><label class="form-label">Peruntukan (RM)</label><input class="form-input" type="number" id="bPeruntukan" placeholder="0.00" min="0" step="0.01"/></div>
+    <div class="form-group"><label class="form-label">Perbelanjaan (RM)</label><input class="form-input" type="number" id="bBelanja" placeholder="0.00" min="0" step="0.01"/></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btnBatalBajet">Batal</button>
+      <button class="btn btn-primary" id="btnSimpanBajet">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL TAKWIM EDIT ═══ -->
+<div class="modal-overlay" id="modalTakwim">
+  <div class="modal">
+    <h3 id="modalTakwimTitle">Edit Aktiviti</h3>
+    <div class="form-group"><label class="form-label">Tarikh</label><input class="form-input" type="date" id="tDate"/></div>
+    <div class="form-group"><label class="form-label">Nama Aktiviti</label><input class="form-input" type="text" id="tNama"/></div>
+    <div class="form-group"><label class="form-label">Lokasi</label><input class="form-input" type="text" id="tLokasi"/></div>
+    <div class="form-group"><label class="form-label">Status</label>
+      <select class="form-input" id="tStatus">
+        <option value="belum">Belum Mula</option>
+        <option value="rancang">Dalam Perancangan</option>
+        <option value="selesai">Selesai Dilaksanakan</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btnBatalTakwim">Batal</button>
+      <button class="btn btn-primary" id="btnSimpanTakwim">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL PELAJAR ═══ -->
+<div class="modal-overlay" id="modalPelajar">
+  <div class="modal">
+    <h3 id="modalPelajarTitle">Tambah Sesi Pelajar</h3>
+    <div class="form-group"><label class="form-label">Sesi Akademik</label><input class="form-input" type="text" id="pSesi" placeholder="cth. 2024/2025"/></div>
+    <div class="form-group"><label class="form-label">Semester</label>
+      <select class="form-input" id="pSemester"><option value="1">Semester 1</option><option value="2">Semester 2</option><option value="3">Semester 3</option></select>
+    </div>
+    <div class="form-group"><label class="form-label">Bilangan Pelajar</label><input class="form-input" type="number" id="pBil" placeholder="0" min="0" step="1"/></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btnBatalPelajar">Batal</button>
+      <button class="btn btn-primary" id="btnSimpanPelajar">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CONFIRM DELETE ═══ -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <p id="confirmMsg">Adakah anda pasti untuk memadam rekod ini?</p>
+    <div class="confirm-btns">
+      <button class="btn-confirm-cancel" id="confirmNo">Batal</button>
+      <button class="btn-confirm-del" id="confirmYes">Ya, Padam</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// UTILITIES
+// ══════════════════════════════════════════════════
+function fmt(v){ return 'RM '+parseFloat(v).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+function pad2(n){ return n<10?'0'+n:n; }
+function dateToStr(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+
+function lsGet(key,def){ try{ var v=localStorage.getItem(key); return v?JSON.parse(v):def; }catch(e){ return def; } }
+function lsSet(key,val){ try{ localStorage.setItem(key,JSON.stringify(val)); }catch(e){} }
+
+var confirmCb = null;
+function showConfirm(msg,cb){
+  document.getElementById('confirmMsg').textContent = msg;
+  confirmCb = cb;
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+document.getElementById('confirmNo').addEventListener('click', function(){ document.getElementById('confirmOverlay').classList.remove('open'); confirmCb=null; });
+document.getElementById('confirmYes').addEventListener('click', function(){ document.getElementById('confirmOverlay').classList.remove('open'); if(confirmCb) confirmCb(); confirmCb=null; });
+
+// ══════════════════════════════════════════════════
+// SIDEBAR NAVIGATION
+// ══════════════════════════════════════════════════
+var sbItems  = document.querySelectorAll('.sb-item');
+var sections = document.querySelectorAll('.module-section');
+
+function showSection(id){
+  sections.forEach(function(s){ s.classList.remove('active'); });
+  sbItems.forEach(function(i){ i.classList.remove('active'); });
+  var sec = document.getElementById(id);
+  if(sec) sec.classList.add('active');
+  var btn = document.querySelector('.sb-item[data-target="'+id+'"]');
+  if(btn) btn.classList.add('active');
+  document.getElementById('sidebar').classList.remove('open');
+}
+sbItems.forEach(function(item){ item.addEventListener('click', function(){ showSection(item.dataset.target); }); });
+document.getElementById('menuToggle').addEventListener('click', function(){ document.getElementById('sidebar').classList.toggle('open'); });
+
+// ══════════════════════════════════════════════════
+// BAJET
+// ══════════════════════════════════════════════════
+var DEFAULT_BAJET = [
+  { id:1, kategori:"Peralatan & Perisian Studio", peruntukan:8000, belanja:7450 },
+  { id:2, kategori:"Bahan Pengajaran & Modul",    peruntukan:3000, belanja:2800 },
+  { id:3, kategori:"Lawatan Industri",             peruntukan:4500, belanja:0   },
+  { id:4, kategori:"Pameran Projek Akhir",         peruntukan:2500, belanja:0   },
+  { id:5, kategori:"Seminar & Bengkel",            peruntukan:2000, belanja:1200 },
+  { id:6, kategori:"Kos Am Program",              peruntukan:1500, belanja:620  },
+];
+var bajetData   = lsGet('sdd_bajet', DEFAULT_BAJET);
+var bajetNextId = lsGet('sdd_bajet_nid', 10);
+var bajetEditId = null;
+
+function saveBajet(){ lsSet('sdd_bajet',bajetData); lsSet('sdd_bajet_nid',bajetNextId); }
+
+function renderBajet(){
+  var tbody = document.getElementById('bajetTbody');
+  tbody.innerHTML = '';
+  var totA=0,totS=0;
+  bajetData.forEach(function(row){
+    totA+=row.peruntukan; totS+=row.belanja;
+    var baki=row.peruntukan-row.belanja;
+    var rowPct=row.peruntukan>0?Math.min(Math.round((row.belanja/row.peruntukan)*100),100):0;
+    var pctColor=rowPct>=100?'var(--red)':rowPct>=75?'var(--amber)':'var(--green)';
+    var barBg=rowPct>=100?'var(--red)':rowPct>=75?'linear-gradient(90deg,var(--amber),#fbbf24)':'linear-gradient(90deg,var(--purple),var(--purp2))';
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td style="font-weight:600">'+row.kategori+'</td>'+
+      '<td>'+fmt(row.peruntukan)+'</td>'+
+      '<td>'+fmt(row.belanja)+'</td>'+
+      '<td style="color:'+(baki>=0?'var(--green)':'var(--red)')+';font-weight:700">'+fmt(baki)+'</td>'+
+      '<td><div class="pct-cell"><span style="color:'+pctColor+'">'+rowPct+'%</span>'+
+        '<div class="row-bar-wrap"><div class="row-bar-fill" style="width:'+rowPct+'%;background:'+barBg+'"></div></div>'+
+      '</div></td>'+
+      '<td style="display:flex;gap:6px">'+
+        '<button class="btn btn-sm btn-edit-rec" data-id="'+row.id+'">Edit</button>'+
+        '<button class="btn btn-sm btn-del-rec" data-id="'+row.id+'">Padam</button>'+
+      '</td>';
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('.btn-edit-rec').forEach(function(b){ b.addEventListener('click',function(){ openBajetEdit(parseInt(b.dataset.id)); }); });
+  tbody.querySelectorAll('.btn-del-rec').forEach(function(b){ b.addEventListener('click',function(){
+    showConfirm('Padam rekod bajet ini?', function(){
+      bajetData = bajetData.filter(function(r){ return r.id!==parseInt(b.dataset.id); });
+      saveBajet(); renderBajet();
+    });
+  }); });
+
+  var bal=totA-totS;
+  var pct=totA>0?Math.min(Math.round((totS/totA)*100),100):0;
+
+  // summary cards
+  var a=document.getElementById('bajetAlloc'); if(a) a.textContent=fmt(totA);
+  var s=document.getElementById('bajetSpent'); if(s) s.textContent=fmt(totS);
+  var bl=document.getElementById('bajetBal');  if(bl) bl.textContent=fmt(bal);
+  var bf=document.getElementById('bajetBarFill'); if(bf) bf.style.width=pct+'%';
+  var bp=document.getElementById('bajetPct'); if(bp) bp.textContent=pct+'% daripada peruntukan telah digunakan';
+  var as=document.getElementById('bajetAllocSub'); if(as) as.textContent=bajetData.length+' kategori peruntukan';
+  var ss=document.getElementById('bajetSpentSub'); if(ss) ss.textContent=pct+'% daripada peruntukan';
+
+  // home panel
+  var hA=document.getElementById('homeAlloc'); if(hA) hA.textContent=fmt(totA);
+  var hS=document.getElementById('homeSpent'); if(hS) hS.textContent=fmt(totS);
+  var hB=document.getElementById('homeBal');   if(hB) hB.textContent=fmt(bal);
+  var hBF=document.getElementById('homeBarFill'); if(hBF) hBF.style.width=pct+'%';
+  var hBB=document.getElementById('homeBakiBajet'); if(hBB) hBB.textContent=fmt(bal);
+  var hBS=document.getElementById('homeBajetSub'); if(hBS) hBS.textContent='Peruntukan: '+fmt(totA)+' | Belanja: '+fmt(totS);
+
+  // ── Grouped Bar Chart ──
+  var chartEl=document.getElementById('bajetBarChart');
+  if(!chartEl) return;
+  chartEl.innerHTML='';
+  var maxVal=0;
+  bajetData.forEach(function(r){ if(r.peruntukan>maxVal) maxVal=r.peruntukan; });
+  if(maxVal===0) return;
+  var CHART_H=160;
+  var tooltip=document.getElementById('barTooltip');
+  function showTip(e,txt){ tooltip.textContent=txt; tooltip.style.display='block'; tooltip.style.left=(e.clientX+12)+'px'; tooltip.style.top=(e.clientY-34)+'px'; }
+  function hideTip(){ tooltip.style.display='none'; }
+
+  bajetData.forEach(function(row){
+    var hP=Math.max(Math.round((row.peruntukan/maxVal)*CHART_H),4);
+    var hBr=row.belanja>0?Math.max(Math.round((row.belanja/maxVal)*CHART_H),4):2;
+    var shortLabel=row.kategori.length>14?row.kategori.substring(0,13)+'…':row.kategori;
+    var grp=document.createElement('div');
+    grp.className='bar-group';
+    grp.innerHTML=
+      '<div class="bar-group-bars">'+
+        '<div class="bar bar-peruntukan" style="height:'+hP+'px">'+
+          '<span class="bar-val">'+Math.round(row.peruntukan/1000)+'k</span>'+
+        '</div>'+
+        '<div class="bar bar-belanja" style="height:'+hBr+'px">'+
+          (hBr>16?'<span class="bar-val">'+Math.round(row.belanja/1000)+'k</span>':'')+
+        '</div>'+
+      '</div>'+
+      '<div class="bar-label">'+shortLabel+'</div>';
+    chartEl.appendChild(grp);
+    var bars=grp.querySelectorAll('.bar');
+    bars[0].addEventListener('mousemove',function(e){ showTip(e,'Peruntukan: '+fmt(row.peruntukan)); });
+    bars[0].addEventListener('mouseleave',hideTip);
+    bars[1].addEventListener('mousemove',function(e){ showTip(e,'Perbelanjaan: '+fmt(row.belanja)); });
+    bars[1].addEventListener('mouseleave',hideTip);
+  });
+}
+
+function openBajetEdit(id){
+  var row=bajetData.find(function(r){return r.id===id;});
+  if(!row) return;
+  bajetEditId=id;
+  document.getElementById('bKategori').value=row.kategori;
+  document.getElementById('bPeruntukan').value=row.peruntukan;
+  document.getElementById('bBelanja').value=row.belanja;
+  document.getElementById('modalBajetTitle').textContent='Edit Peruntukan Bajet';
+  document.getElementById('modalBajet').classList.add('open');
+}
+document.getElementById('btnTambahBajet').addEventListener('click',function(){
+  bajetEditId=null;
+  document.getElementById('bKategori').value='';
+  document.getElementById('bPeruntukan').value='';
+  document.getElementById('bBelanja').value='';
+  document.getElementById('modalBajetTitle').textContent='Tambah Peruntukan Bajet';
+  document.getElementById('modalBajet').classList.add('open');
+});
+document.getElementById('btnBatalBajet').addEventListener('click',function(){ document.getElementById('modalBajet').classList.remove('open'); });
+document.getElementById('modalBajet').addEventListener('click',function(e){ if(e.target===document.getElementById('modalBajet')) document.getElementById('modalBajet').classList.remove('open'); });
+document.getElementById('btnSimpanBajet').addEventListener('click',function(){
+  var kat=document.getElementById('bKategori').value.trim();
+  var per=parseFloat(document.getElementById('bPeruntukan').value)||0;
+  var bel=parseFloat(document.getElementById('bBelanja').value)||0;
+  if(!kat){ document.getElementById('bKategori').focus(); return; }
+  if(bajetEditId!==null){
+    var row=bajetData.find(function(r){return r.id===bajetEditId;});
+    if(row){row.kategori=kat;row.peruntukan=per;row.belanja=bel;}
+  } else {
+    bajetData.push({id:bajetNextId++,kategori:kat,peruntukan:per,belanja:bel});
+  }
+  saveBajet();
+  document.getElementById('modalBajet').classList.remove('open');
+  renderBajet();
+});
+
+// ══════════════════════════════════════════════════
+// TAKWIM / CALENDAR
+// ══════════════════════════════════════════════════
+var DEFAULT_TAKWIM = [
+  {id:1, year:2025,month:2, day:3,  nama:'Minggu Orientasi Pelajar Baharu',        lokasi:'Dewan Utama, KKKL', status:'selesai'},
+  {id:2, year:2025,month:3, day:18, nama:'Bengkel Teknik Animasi Adobe Animate',   lokasi:'Makmal Komputer A, Blok B', status:'selesai'},
+  {id:3, year:2025,month:4, day:12, nama:'Lawatan Industri ke Studio Animasi',     lokasi:"Les' Copaque Production, Shah Alam", status:'rancang'},
+  {id:4, year:2025,month:5, day:25, nama:'Pameran Projek Akhir Pelajar SDD',       lokasi:'Foyer Utama, KKKL', status:'rancang'},
+  {id:5, year:2025,month:7, day:10, nama:'Program Alumni & Majlis Graduasi SDD',   lokasi:'Dewan Utama, KKKL', status:'belum'},
+  {id:6, year:2025,month:8, day:22, nama:'Seminar Peluang Kerjaya Industri Kreatif',lokasi:'Bilik Seminar, Blok A', status:'belum'},
+];
+var takwimData   = lsGet('sdd_takwim', DEFAULT_TAKWIM);
+var takwimNextId = lsGet('sdd_takwim_nid', 20);
+var takwimEditId = null;
+var calDetailEventId = null;
+
+var statusLabel = {selesai:'Selesai Dilaksanakan',rancang:'Dalam Perancangan',belum:'Belum Mula'};
+var statusPillClass = {selesai:'pill pill-selesai',rancang:'pill pill-rancang',belum:'pill pill-belum'};
+var namaBulan   = ['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'];
+var today = new Date();
+var calYear = today.getFullYear();
+var calMonth = today.getMonth();
+
+function saveTakwim(){ lsSet('sdd_takwim',takwimData); lsSet('sdd_takwim_nid',takwimNextId); }
+
+function getEventsForDay(yr,mo,dy){ return takwimData.filter(function(e){return e.year===yr&&e.month===mo&&e.day===dy;}); }
+
+function renderCalendar(){
+  var grid=document.getElementById('calGrid');
+  grid.innerHTML='';
+  document.getElementById('calMonthLabel').textContent=namaBulan[calMonth]+' '+calYear;
+  var days=['Ahd','Isn','Sel','Rab','Kha','Jum','Sab'];
+  days.forEach(function(d){ var h=document.createElement('div');h.className='cal-day-hdr';h.textContent=d;grid.appendChild(h); });
+  var firstDay=new Date(calYear,calMonth,1).getDay();
+  var daysIn=new Date(calYear,calMonth+1,0).getDate();
+  for(var i=0;i<firstDay;i++){ var e=document.createElement('div');e.className='cal-cell empty';grid.appendChild(e); }
+  for(var d=1;d<=daysIn;d++){
+    var cell=document.createElement('div');
+    var evs=getEventsForDay(calYear,calMonth,d);
+    var cls='cal-cell';
+    if(evs.length) cls+=' has-event ev-'+evs[0].status;
+    if(d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear()) cls+=' today';
+    cell.className=cls; cell.textContent=d;
+    if(evs.length){
+      var dot=document.createElement('div');dot.className='cal-dot';
+      dot.style.background=evs[0].status==='selesai'?'#16a34a':evs[0].status==='rancang'?'#d97706':'#4338ca';
+      cell.appendChild(dot);
+      (function(ev){ cell.addEventListener('click',function(){showCalDetail(ev[0]);}); })(evs);
+    }
+    grid.appendChild(cell);
+  }
+  document.getElementById('calDetail').classList.remove('visible');
+  updateHomeAktiviti();
+}
+
+function showCalDetail(ev){
+  calDetailEventId=ev.id;
+  document.getElementById('calDetailTitle').textContent=ev.nama;
+  document.getElementById('calDetailLoc').textContent=ev.lokasi;
+  var sp=document.getElementById('calDetailStatus');
+  sp.textContent=statusLabel[ev.status]; sp.className=statusPillClass[ev.status];
+  var panel=document.getElementById('calDetail');
+  panel.className='cal-detail visible ev-'+ev.status;
+}
+
+document.getElementById('calPrev').addEventListener('click',function(){ calMonth--;if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); });
+document.getElementById('calNext').addEventListener('click',function(){ calMonth++;if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); });
+
+// Add activity (inline form)
+document.getElementById('btnTambahAktiviti').addEventListener('click',function(){
+  var dateVal=document.getElementById('calInDate').value;
+  var nama=document.getElementById('calInNama').value.trim();
+  var lokasi=document.getElementById('calInLokasi').value.trim();
+  var status=document.getElementById('calInStatus').value;
+  if(!dateVal){document.getElementById('calInDate').focus();return;}
+  if(!nama){document.getElementById('calInNama').focus();return;}
+  var parts=dateVal.split('-');
+  takwimData.push({id:takwimNextId++,year:parseInt(parts[0]),month:parseInt(parts[1])-1,day:parseInt(parts[2]),nama:nama,lokasi:lokasi||'—',status:status});
+  saveTakwim();
+  calYear=parseInt(parts[0]); calMonth=parseInt(parts[1])-1;
+  document.getElementById('calInDate').value='';
+  document.getElementById('calInNama').value='';
+  document.getElementById('calInLokasi').value='';
+  document.getElementById('calInStatus').value='belum';
+  renderCalendar();
+});
+
+// Edit from detail panel
+document.getElementById('calDetailEdit').addEventListener('click',function(){
+  if(calDetailEventId===null) return;
+  var ev=takwimData.find(function(e){return e.id===calDetailEventId;});
+  if(!ev) return;
+  takwimEditId=ev.id;
+  document.getElementById('tDate').value=ev.year+'-'+pad2(ev.month+1)+'-'+pad2(ev.day);
+  document.getElementById('tNama').value=ev.nama;
+  document.getElementById('tLokasi').value=ev.lokasi;
+  document.getElementById('tStatus').value=ev.status;
+  document.getElementById('modalTakwimTitle').textContent='Edit Aktiviti';
+  document.getElementById('modalTakwim').classList.add('open');
+});
+document.getElementById('calDetailDel').addEventListener('click',function(){
+  if(calDetailEventId===null) return;
+  var ev=takwimData.find(function(e){return e.id===calDetailEventId;});
+  if(!ev) return;
+  showConfirm('Padam aktiviti "'+ev.nama+'"?',function(){
+    takwimData=takwimData.filter(function(e){return e.id!==calDetailEventId;});
+    saveTakwim(); calDetailEventId=null; renderCalendar();
+  });
+});
+document.getElementById('btnBatalTakwim').addEventListener('click',function(){ document.getElementById('modalTakwim').classList.remove('open'); });
+document.getElementById('modalTakwim').addEventListener('click',function(e){ if(e.target===document.getElementById('modalTakwim')) document.getElementById('modalTakwim').classList.remove('open'); });
+document.getElementById('btnSimpanTakwim').addEventListener('click',function(){
+  var dateVal=document.getElementById('tDate').value;
+  var nama=document.getElementById('tNama').value.trim();
+  if(!dateVal||!nama) return;
+  var parts=dateVal.split('-');
+  var ev=takwimData.find(function(e){return e.id===takwimEditId;});
+  if(ev){ ev.year=parseInt(parts[0]);ev.month=parseInt(parts[1])-1;ev.day=parseInt(parts[2]);ev.nama=nama;ev.lokasi=document.getElementById('tLokasi').value.trim()||'—';ev.status=document.getElementById('tStatus').value; }
+  saveTakwim();
+  document.getElementById('modalTakwim').classList.remove('open');
+  calDetailEventId=null;
+  renderCalendar();
+});
+
+// ══════════════════════════════════════════════════
+// PELAJAR
+// ══════════════════════════════════════════════════
+var DEFAULT_PELAJAR = [
+  {id:1, sesi:'2020/2021',semester:1,bil:14,sim:true},
+  {id:2, sesi:'2020/2021',semester:2,bil:14,sim:true},
+  {id:3, sesi:'2021/2022',semester:1,bil:18,sim:true},
+  {id:4, sesi:'2021/2022',semester:2,bil:17,sim:true},
+  {id:5, sesi:'2022/2023',semester:1,bil:21,sim:true},
+  {id:6, sesi:'2022/2023',semester:2,bil:21,sim:true},
+  {id:7, sesi:'2023/2024',semester:1,bil:24,sim:true},
+  {id:8, sesi:'2023/2024',semester:2,bil:24,sim:true},
+  {id:9, sesi:'2024/2025',semester:1,bil:27,sim:false},
+  {id:10,sesi:'2024/2025',semester:2,bil:26,sim:false},
+];
+var pelajarData   = lsGet('sdd_pelajar', DEFAULT_PELAJAR);
+var pelajarNextId = lsGet('sdd_pelajar_nid', 20);
+var pelajarEditId = null;
+
+function savePelajar(){ lsSet('sdd_pelajar',pelajarData); lsSet('sdd_pelajar_nid',pelajarNextId); }
+
+function getSesiList(){
+  var seen={};
+  pelajarData.forEach(function(r){ seen[r.sesi]=true; });
+  return Object.keys(seen).sort();
+}
+
+function renderPelajarFilter(){
+  var sel=document.getElementById('sesiFilter');
+  var prev=sel.value;
+  sel.innerHTML='<option value="all">Semua Sesi</option>';
+  getSesiList().forEach(function(s){ var o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o); });
+  if(prev) sel.value=prev;
+}
+
+function renderPelajar(){
+  renderPelajarFilter();
+  var filter=document.getElementById('sesiFilter').value;
+  var rows=filter==='all'?pelajarData:pelajarData.filter(function(r){return r.sesi===filter;});
+
+  // stats
+  var s1=rows.filter(function(r){return r.semester==1;}).reduce(function(a,r){return a+r.bil;},0);
+  var s2=rows.filter(function(r){return r.semester==2;}).reduce(function(a,r){return a+r.bil;},0);
+  var total=s1+s2;
+  document.getElementById('psTotal').textContent=total;
+  document.getElementById('psSem1').textContent=s1;
+  document.getElementById('psSem2').textContent=s2;
+  document.getElementById('filterTag').textContent=filter==='all'?'(Semua sesi)':'(Sesi '+filter+')';
+
+  // chart — group by sesi, sum semesters
+  var bySession={};
+  pelajarData.forEach(function(r){ if(!bySession[r.sesi]) bySession[r.sesi]=0; bySession[r.sesi]+=r.bil; });
+  var sessions=getSesiList();
+  var maxBil=Math.max.apply(null,sessions.map(function(s){return bySession[s]||0;}));
+  var area=document.getElementById('chartArea');
+  area.innerHTML='';
+  sessions.forEach(function(s){
+    var val=bySession[s]||0;
+    var pct=maxBil>0?Math.round((val/maxBil)*100):0;
+    var row=document.createElement('div');row.className='chart-row';
+    row.innerHTML='<div class="chart-sess">'+s+'</div>'+
+      '<div class="chart-track"><div class="chart-fill" style="width:'+pct+'%">'+(pct>18?val+' pelajar':'')+'</div></div>'+
+      '<div class="chart-count">'+val+'</div>';
+    area.appendChild(row);
+  });
+
+  // chart stats
+  if(sessions.length>=2){
+    var latest=sessions[sessions.length-1];
+    var prev=sessions[sessions.length-2];
+    var diff=(bySession[latest]||0)-(bySession[prev]||0);
+    document.getElementById('chartStats').innerHTML=
+      '<div style="font-size:13px;color:var(--muted)">Sesi Terkini: <strong style="color:var(--navy)">'+latest+'</strong></div>'+
+      '<div style="font-size:13px;color:var(--muted)">Jumlah: <strong style="color:var(--purple)">'+(bySession[latest]||0)+' pelajar</strong></div>'+
+      '<div style="font-size:13px;color:var(--muted)">Perubahan: <strong style="color:'+(diff>=0?'var(--green)':'var(--red)')+'"> '+(diff>=0?'+':'')+diff+' pelajar</strong></div>';
+  }
+
+  // table
+  var tbody=document.getElementById('pelajarTbody');
+  tbody.innerHTML='';
+  rows.forEach(function(row){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td style="font-weight:600">'+row.sesi+'</td>'+
+      '<td>Semester '+row.semester+'</td>'+
+      '<td style="font-weight:700;color:var(--purple)">'+row.bil+'</td>'+
+      '<td><span class="data-tag '+(row.sim?'tag-sim':'tag-real')+'">'+(row.sim?'Data Simulasi':'Data Sebenar')+'</span></td>'+
+      '<td style="display:flex;gap:6px">'+
+        '<button class="btn btn-sm btn-edit-rec" data-id="'+row.id+'">Edit</button>'+
+        '<button class="btn btn-sm btn-del-rec" data-id="'+row.id+'">Padam</button>'+
+      '</td>';
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('.btn-edit-rec').forEach(function(b){ b.addEventListener('click',function(){openPelajarEdit(parseInt(b.dataset.id));}); });
+  tbody.querySelectorAll('.btn-del-rec').forEach(function(b){ b.addEventListener('click',function(){
+    showConfirm('Padam rekod enrolmen ini?',function(){
+      pelajarData=pelajarData.filter(function(r){return r.id!==parseInt(b.dataset.id);});
+      savePelajar(); renderPelajar();
+    });
+  }); });
+
+  // update home card
+  var latestSesi=getSesiList();
+  if(latestSesi.length){
+    var ls=latestSesi[latestSesi.length-1];
+    var lsTotal=pelajarData.filter(function(r){return r.sesi===ls;}).reduce(function(a,r){return a+r.bil;},0);
+    var hp=document.getElementById('homeBilPelajar'); if(hp) hp.textContent=lsTotal;
+    var hps=document.getElementById('homePelajarSub'); if(hps) hps.textContent='Sesi terkini: '+ls;
+  }
+}
+
+function openPelajarEdit(id){
+  var row=pelajarData.find(function(r){return r.id===id;});
+  if(!row) return;
+  pelajarEditId=id;
+  document.getElementById('pSesi').value=row.sesi;
+  document.getElementById('pSemester').value=row.semester;
+  document.getElementById('pBil').value=row.bil;
+  document.getElementById('modalPelajarTitle').textContent='Edit Rekod Pelajar';
+  document.getElementById('modalPelajar').classList.add('open');
+}
+document.getElementById('btnTambahSesi').addEventListener('click',function(){
+  pelajarEditId=null;
+  document.getElementById('pSesi').value='';
+  document.getElementById('pSemester').value='1';
+  document.getElementById('pBil').value='';
+  document.getElementById('modalPelajarTitle').textContent='Tambah Sesi Pelajar';
+  document.getElementById('modalPelajar').classList.add('open');
+});
+document.getElementById('btnBatalPelajar').addEventListener('click',function(){ document.getElementById('modalPelajar').classList.remove('open'); });
+document.getElementById('modalPelajar').addEventListener('click',function(e){ if(e.target===document.getElementById('modalPelajar')) document.getElementById('modalPelajar').classList.remove('open'); });
+document.getElementById('btnSimpanPelajar').addEventListener('click',function(){
+  var sesi=document.getElementById('pSesi').value.trim();
+  var sem=parseInt(document.getElementById('pSemester').value);
+  var bil=parseInt(document.getElementById('pBil').value);
+  if(!sesi){document.getElementById('pSesi').focus();return;}
+  if(isNaN(bil)||bil<0){document.getElementById('pBil').focus();return;}
+  if(pelajarEditId!==null){
+    var row=pelajarData.find(function(r){return r.id===pelajarEditId;});
+    if(row){row.sesi=sesi;row.semester=sem;row.bil=bil;row.sim=false;}
+  } else {
+    pelajarData.push({id:pelajarNextId++,sesi:sesi,semester:sem,bil:bil,sim:false});
+  }
+  savePelajar();
+  document.getElementById('modalPelajar').classList.remove('open');
+  renderPelajar();
+});
+document.getElementById('sesiFilter').addEventListener('change',function(){ renderPelajar(); });
+
+// ══════════════════════════════════════════════════
+// HOME — Aktiviti Akan Datang
+// ══════════════════════════════════════════════════
+function updateHomeAktiviti(){
+  var now=new Date(); now.setHours(0,0,0,0);
+  var upcoming=takwimData.filter(function(e){
+    var d=new Date(e.year,e.month,e.day); return d>=now && e.status!=='selesai';
+  }).sort(function(a,b){ return new Date(a.year,a.month,a.day)-new Date(b.year,b.month,b.day); });
+  var hA=document.getElementById('homeAktiviti'); if(hA) hA.textContent=upcoming.length;
+  var hAS=document.getElementById('homeAktivitiSub');
+  if(hAS && upcoming.length>0){
+    var nxt=upcoming[0];
+    hAS.textContent='Seterusnya: '+nxt.nama+' ('+pad2(nxt.day)+' '+namaBulan[nxt.month]+')';
+  } else if(hAS){
+    hAS.textContent='Tiada aktiviti akan datang';
+  }
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+renderBajet();
+renderCalendar();
+renderPelajar();
+</script>
+</body>
+</html>
